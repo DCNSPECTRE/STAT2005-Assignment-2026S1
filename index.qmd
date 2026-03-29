@@ -1,10 +1,10 @@
 ---
-title: "A study of ramp-metering in Perth"
+title: "A study of on-ramp metering in Perth"
 format: html
 editor: visual
 ---
 
-# A Study of Ramp-Metering in Perth
+# A Study of On-Ramp Metering in Perth
 
 | Name              | Student ID |
 |-------------------|------------|
@@ -13,3 +13,232 @@ editor: visual
 | Madhan Jeelaga    | 22815626   |
 
 : *Authors*
+
+## Introduction and Background (10 marks)
+
+-   Problem context
+
+-   Objectives
+
+-   Significance
+
+-   Brief literature review (3-5 relevant sources)
+
+Perth's freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth's outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (**Main Roads, REFERENCE**). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (**ABC, REFERENCE**).
+
+In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to fine-tune the timing of the system and see how
+
+A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively ([**REFERENCE**](https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf)). Typically, this utilisation rate is maintained in the range of 80-90% (AGAIN REFERENCE).
+
+\*\* this is unfinished but just trying to get ideas
+
+```{r "Importing and filtering"}
+#| include: false
+
+# Keep these commented as the full files were too large to upload to Github
+# Importing datasets
+# raw23 <- read.csv("2023-03.csv")
+# raw25 <- read.csv("2025-03.csv")
+
+# Filtering for on-ramp segment
+# ramp25 <- raw25[raw25$MLinkID == 5725, ]
+# ramp23 <- raw23[raw23$MLinkID == 5725, ]
+
+# Filtering for the freeway segment directly following the on-ramp
+# fwy25 <- raw25[raw25$MLinkID == 183, ]
+# fwy23 <- raw23[raw23$MLinkID == 183, ]
+
+# Simplified import commands
+ramp25 <- read.csv("ramp25.csv")
+ramp23 <- read.csv("ramp23.csv")
+
+fwy25 <- read.csv("fwy25.csv")
+fwy23 <- read.csv("fwy23.csv")
+```
+
+```{r "Date and time modifications"}
+#| include: false
+
+library(lubridate)
+
+# Converting datetime strings to date objects
+ramp23$Date.Time.AWST <- ymd_hm(ramp23$Date.Time.AWST)
+
+# Adding day of the week column (1=sunday, 7=saturday)
+ramp23$Weekday <- wday(ramp23$Date.Time.AWST)
+
+# Adding hour of the day column
+ramp23$Hour <- hour(ramp23$Date.Time.AWST)
+
+# Adding 15-min segment identifier of column
+ramp23$Period <- format(ramp23$Date.Time.AWST, "%H:%M")
+
+# Removing weekends
+ramp23.wk <- ramp23[ramp23$Weekday %in% c(2, 3, 4, 5, 6), ]
+
+# Filtering for only the morning peak (6am-10am)
+ramp23.pk.wk <- ramp23.wk[6 <= ramp23.wk$Hour & ramp23.wk$Hour < 10, ]
+
+# Removing public holidays (March 6 is the onyl date - Labour Day)
+ramp23.pk.wk <- ramp23.pk.wk[date(ramp23.pk.wk$Date.Time.AWST) != "2023-03-06", ]
+```
+
+## Methodology (25 marks)
+
+-   Assumptions and model formulation
+
+-   Description of data (if applicable)
+
+-   Justification of modelling choices
+
+Main Roads have a large online repository of traffic volume measurements from 2013 to the present day. Each entry is a 15-minute interval which can be accessed for any road segment using its unique MLinkID. We can filter for the on-ramp of interest using its ID 5725:
+
+```{r "Filtered datset"}
+head(ramp23[, c(-6, -7, -8, -9, -10)])
+```
+
+> Here, 'Volume' refers to the count of vehicles, and 'TravelTimeMinutes' the average time to travel that particular road segment.
+
+TALK ABOUT MEMORYLESS PROPERTY AS A FALLBACK/ASSUMPTION
+
+In order to construct a queuing model, we can use this dataset to simulate the incoming volume of traffic during the morning peak. Typically, this model would be formed on the Poisson distribution because of its memoryless property and ease of implementation. However, a Poisson distribution assumes an equal mean and variance, so it's important that verify this assumption. To visualise, let's filter the above for weekdays, the peak hours, and without public holidays (eg 06/03/23 – Labour Day), yielding the following:
+
+```{r "Aggregating average daily volumes"}
+#| include: false
+
+smeans <- aggregate(Volume ~ Period, 
+                           data = ramp23.pk.wk, 
+                           FUN = mean)
+
+# getting max volume
+smax <- max(smeans$Volume)
+maxindex <- which(smeans$Volume == smax)
+
+# getting mean volume
+smean <- mean(smeans$Volume)
+
+# getting min volume
+smin <- min(smeans$Volume)
+minindex <- which(smeans$Volume == smin)
+```
+
+```{r "Volume barplot"}
+#| echo: false
+
+bp <- barplot(smeans$Volume, names.arg = smeans$Period, col="#abbf9d", xlab = "Time of Morning", ylab = "Mean Volume of Period", main="Volume of Merging Traffic, March 2023")
+
+abline(v = bp[1], col = "#252e1f", lwd = 3, lty = 2)
+text(x = bp[1], y = smax, labels = round(smeans$Volume[1], 2), pos = 3, xpd = TRUE)
+
+abline(v = bp[5], col = "#252e1f", lwd = 3, lty = 2)
+text(x = bp[5], y = smax, labels = round(smeans$Volume[5], 2), pos = 3, xpd = TRUE)
+
+abline(v = bp[9], col = "#252e1f", lwd = 3, lty = 2)
+text(x = bp[9], y = smax, labels = round(smeans$Volume[9], 2), pos = 3, xpd = TRUE)
+```
+
+We can see that the volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am. We'll focus on the 6:00-6:15am interval for now:
+
+```{r "Parameters for 6am model"}
+smu6  <- mean(ramp23.pk.wk[ramp23.pk.wk$Period == "06:00", 4])
+svar6 <- var(ramp23.pk.wk[ramp23.pk.wk$Period == "06:00", 4])
+
+data.frame (
+  Mean = smu6,
+  Variance = svar6,
+  row.names = c("6am (min)")
+)
+```
+
+Even still, this is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mu and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID) We can calculate this size parameter $r$ as follows (**REFERENCEEEE**):
+
+$$r = \frac{\mu^2}{\sigma^2 - \mu}$$
+
+```{r "Calculating 6am disperion factor"}
+#| include: false
+
+ssize6 <- (smu6^2) / (svar6 - smu6)
+```
+
+To see the improvement in fit, let's simulate a Poisson and a Negative Binomial with these parameters and compare with the original dataset.
+
+```{r "Simulating goodness of fit improvement"}
+sim1 <- rnbinom(10000, size = ssize6, mu = smu6)
+sim2 <- rpois(10000, lambda = smu6)
+data.frame (
+  Mean = c(smu6, mean(sim1), mean(sim2)),
+  Variance = c(svar6, var(sim1), mean(sim2)),
+  row.names = c("Dataset", "NBinom Sim", "Poisson Sim  ")
+)
+```
+
+In a simulation, the negative binomial is a much better fit to the original dataset. Therefore, continuing with for 7am and 8am we yield the following piecewise parameters:
+
+```{r "Calculating 7am and 8am parameters"}
+#| include: false
+
+# 7am models
+smu7  <- mean(ramp23.pk.wk[ramp23.pk.wk$Period == "07:00", 4])
+svar7 <- var(ramp23.pk.wk[ramp23.pk.wk$Period == "07:00", 4])
+ssize7 <- (smu7^2) / (svar7 - smu7)
+
+# 8am models
+smu8  <- mean(ramp23.pk.wk[ramp23.pk.wk$Period == "08:00", 4])
+svar8 <- var(ramp23.pk.wk[ramp23.pk.wk$Period == "08:00", 4])
+ssize8 <- (smu8^2) / (svar8 - smu8)
+```
+
+```{r "Showing parameters for all models"}
+#| echo: false
+
+data.frame(
+  Mean = c(smu6, smu7, smu8),
+  Variance = c(svar6, svar7, svar8),
+  Size = c(ssize6, ssize7, ssize8),
+  row.names = c("6am (min)", "7am (max)", "8am (mean)")
+)
+```
+
+## Model Implementation and Results (45 marks)
+
+-   Implementation (code integrated with explanation)
+
+-   Statistical summaries and visualisations
+
+-   Interpretation in context
+
+```{r "Simulating Testing"}
+T <- 1000
+
+# average 12 cars per minute release
+release <- 12 * 15 #no. of releases for 1 15 minute interval
+
+qlength <- numeric(T)
+
+for (i in 1:T) {
+  qlength[i+1] <- qlength[i] + rnbinom(1, size=ssize8, mu=smu8)
+  qlength[i+1] <- max(0, qlength[i+1] - release)
+}
+
+plot(qlength)
+```
+
+## Conclusion (15 marks)
+
+-   Discussion of results
+
+-   Strengths and limitations
+
+-   Possible extensions (future work)
+
+-   Practical implications
+
+## Contributions
+
+## Appendix
+
+-   Additional plots
+
+-   Extended code
+
+-   Supplementary results
