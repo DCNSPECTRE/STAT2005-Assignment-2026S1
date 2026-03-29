@@ -4,15 +4,13 @@ format: html
 editor: visual
 ---
 
-# A Study of On-Ramp Metering in Perth
-
 | Name              | Student ID |
 |-------------------|------------|
 | Christian Fazzari | 22220880   |
 | Annas Atif        | 22224125   |
 | Madhan Jeelaga    | 22815626   |
 
-: *Authors*
+: *Project Authors*
 
 ## Introduction and Background (10 marks)
 
@@ -210,8 +208,23 @@ data.frame(
 ```{r "Simulating Testing"}
 T <- 1000
 
+
 # average 12 cars per minute release
-release <- 12 * 15 #no. of releases for 1 15 minute interval
+release <- 12 * 15 # no. of releases for 1 15 minute interval
+
+qlength <- numeric(T)
+
+for (i in 1:T) {
+  qlength[i+1] <- qlength[i] + rnbinom(1, size=ssize8, mu=smu8)
+  qlength[i+1] <- max(0, qlength[i+1] - release)
+}
+
+par(mfrow=c(1, 2))
+plot(qlength)
+
+
+# average 11 cars per minute
+release <- 11 * 15 # no. of releases for 1 15 minute interval
 
 qlength <- numeric(T)
 
