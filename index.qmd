@@ -22,11 +22,11 @@ editor: visual
 
 -   Brief literature review (3-5 relevant sources)
 
-Perth's freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth's outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (**Main Roads, REFERENCE**). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (**ABC, REFERENCE**).
+Perth's freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth's outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (Main Roads, 2025). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (ABC, 2025).
 
-In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to fine-tune the timing of the system and see how
+In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to adjust and maximise release timing while maintaining stability of the system.
 
-A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively ([**REFERENCE**](https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf)). Typically, this utilisation rate is maintained in the range of 80-90% (AGAIN REFERENCE).
+A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (David Levinson, 2021).
 
 \*\* this is unfinished but just trying to get ideas
 
@@ -236,6 +236,64 @@ for (i in 1:T) {
 plot(qlength)
 ```
 
+```{r}
+T <- 1000 # no. of timesteps (each is a 15min interval)
+c <- 2 # no. of lanes
+
+mu <- 5.8 * 15 # mean no. vehicles released PER LANE in one timestep 
+lambda <- smu8 # mean no. vehicles arriving TOTAL in one timestep
+dispersion <- ssize8 # dispersion parameter for arrival rate
+
+q1 <- c()
+q2 <- c()
+
+wtimes <- list()
+q1c <- numeric(T)
+q2c <- numeric(T)
+
+avg_wait_at_i <- list()
+
+for (i in 1:T) {
+  # arrivals
+  arrivals <- rnbinom(1, size = dispersion, mu = lambda)
+  
+  q1a <- floor(arrivals / 2)
+  q2a <- ceiling(arrivals /2)
+  
+  q1 <- c(q1, rep(i, q1a))
+  q2 <- c(q2, rep(i, q2a))
+  
+  # release parameters
+  release <- mu
+  timestep.wtimes <- c()
+  
+  # finding how many cars should be released
+  q1r <- min(length(q1), release)
+  q2r <- min(length(q2), release)
+  
+  # releasing cars and tracking how long they waited
+  if (q1r > 0) {
+    timestep.wtimes <- c(timestep.wtimes, i - q1[1:q1r])
+    q1 <- q1[-(1:q1r)]
+  }
+  if (q2r > 0) {
+    timestep.wtimes <- c(timestep.wtimes, i - q2[1:q2r])
+    q2 <- q2[-(1:q2r)]
+  }
+  
+  # record data
+  wtimes[[i]] <- timestep.wtimes
+  q1c[i] <- length(q1)
+  q2c[i] <- length(q2)
+  
+  avg_wait_at_i[i] <- if(length(timestep.wtimes) > 0) mean(timestep.wtimes)
+  
+}
+all_waits <- unlist(wtimes)
+# plot(q1c)
+plot(1:T, avg_wait_at_i)
+```
+
 ## Conclusion (15 marks)
 
 -   Discussion of results
@@ -255,3 +313,23 @@ plot(qlength)
 -   Extended code
 
 -   Supplementary results
+
+## References
+
+*2025 Annual Report \| Main Roads Western Australia*. (2025). Wa.gov.au; Main Roads Western Australia.
+
+<https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf>
+
+Burmas, G. (2025, February 3). Perth drivers still not convinced by benefits of \$200 million smart freeway. Abc.net.au; ABC News.
+
+<https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328>
+
+Righini, G. (2022). *Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory*.
+
+<https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf>
+
+‌David Levinson (2021, February 28). Engineering LibreTexts.
+
+<https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com>
+
+‌
