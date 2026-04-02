@@ -1,0 +1,11 @@
+/* headings a bit smaller */
+/*h1 { font-size: 1.4em; }
+h2 { font-size: 1.2em; }
+h3 { font-size: 1.05em; }*/
+
+/* adding caption style */
+.caption {
+  font-size: 0.9em;
+  color: #666;
+  font-style: italic;
+}

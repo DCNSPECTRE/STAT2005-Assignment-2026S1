@@ -71,6 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="fullcontent">
@@ -96,10 +97,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<section id="a-study-of-on-ramp-metering-in-perth" class="level1">
-<h1>A Study of On-Ramp Metering in Perth</h1>
 <table class="table">
-<caption><em>Authors</em></caption>
+<caption><em>Project Authors</em></caption>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -129,9 +128,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Significance</p></li>
 <li><p>Brief literature review (3-5 relevant sources)</p></li>
 </ul>
-<p>Perth’s freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth’s outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (<strong>Main Roads, REFERENCE</strong>). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (<strong>ABC, REFERENCE</strong>).</p>
-<p>In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to fine-tune the timing of the system and see how</p>
-<p>A queuing system with <span class="math inline">\(c\)</span> lanes is stable (i.e.&nbsp;has a controllable load) if its utilisation rate <span class="math inline">\(\rho = \frac{\lambda}{c \times \mu}\)</span> is less than <span class="math inline">\(1\)</span>, where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mu\)</span> refer to the mean arrival and departure rates respectively (<a href="https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf"><strong>REFERENCE</strong></a>). Typically, this utilisation rate is maintained in the range of 80-90% (AGAIN REFERENCE).</p>
+<p>Perth’s freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth’s outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (Main Roads, 2025). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (ABC, 2025).</p>
+<p>In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to adjust and maximise release timing while maintaining stability of the system.</p>
+<p>A queuing system with <span class="math inline">\(c\)</span> lanes is stable (i.e.&nbsp;has a controllable load) if its utilisation rate <span class="math inline">\(\rho = \frac{\lambda}{c \times \mu}\)</span> is less than <span class="math inline">\(1\)</span>, where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mu\)</span> refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).</p>
+<p><a href="https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf" class="uri">https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf</a></p>
 <p>** this is unfinished but just trying to get ideas</p>
 </section>
 <section id="methodology-25-marks" class="level2">
@@ -164,46 +164,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="index_files/figure-html/Volume%20barplot-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>We can see that the volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am. We’ll focus on the 6:00-6:15am interval for now:</p>
+<p>The volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am.</p>
+<p>We’ll focus on the 6:00-6:15am interval for now:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>smu6  <span class="ot">&lt;-</span> <span class="fu">mean</span>(ramp23.pk.wk[ramp23.pk.wk<span class="sc">$</span>Period <span class="sc">==</span> <span class="st">"06:00"</span>, <span class="dv">4</span>])</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>svar6 <span class="ot">&lt;-</span> <span class="fu">var</span>(ramp23.pk.wk[ramp23.pk.wk<span class="sc">$</span>Period <span class="sc">==</span> <span class="st">"06:00"</span>, <span class="dv">4</span>])</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span> (</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Mean =</span> smu6,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variance =</span> svar6,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="fu">c</span>(<span class="st">"6am (min)"</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              Mean Variance
 6am (min) 113.2273  161.803</code></pre>
 </div>
 </div>
-<p>Even still, this is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mu and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID) We can calculate this size parameter <span class="math inline">\(r\)</span> as follows (<strong>REFERENCEEEE</strong>):</p>
+<p>This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID AND ALSO ASSUMPTION OF INDEPENDENCE REMAINS) We can calculate this size parameter <span class="math inline">\(r\)</span> as follows:</p>
 <p><span class="math display">\[r = \frac{\mu^2}{\sigma^2 - \mu}\]</span></p>
 <p>To see the improvement in fit, let’s simulate a Poisson and a Negative Binomial with these parameters and compare with the original dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sim1 <span class="ot">&lt;-</span> <span class="fu">rnbinom</span>(<span class="dv">10000</span>, <span class="at">size =</span> ssize6, <span class="at">mu =</span> smu6)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>sim2 <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">10000</span>, <span class="at">lambda =</span> smu6)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span> (</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Mean =</span> <span class="fu">c</span>(smu6, <span class="fu">mean</span>(sim1), <span class="fu">mean</span>(sim2)),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variance =</span> <span class="fu">c</span>(svar6, <span class="fu">var</span>(sim1), <span class="fu">mean</span>(sim2)),</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="fu">c</span>(<span class="st">"Dataset"</span>, <span class="st">"NBinom Sim"</span>, <span class="st">"Poisson Sim  "</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sim1 <span class="ot">&lt;-</span> <span class="fu">rnbinom</span>(<span class="dv">10000</span>, <span class="at">size =</span> ssize6, <span class="at">mu =</span> smu6)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>sim2 <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">10000</span>, <span class="at">lambda =</span> smu6)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span> (</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Mean =</span> <span class="fu">c</span>(smu6, <span class="fu">mean</span>(sim1), <span class="fu">mean</span>(sim2)),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Variance =</span> <span class="fu">c</span>(svar6, <span class="fu">var</span>(sim1), <span class="fu">mean</span>(sim2)),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="fu">c</span>(<span class="st">"Dataset"</span>, <span class="st">"NBinom Sim"</span>, <span class="st">"Poisson Sim  "</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.0312 163.0313
-Poisson Sim   113.0900 113.0900</code></pre>
+NBinom Sim    113.1337 159.5374
+Poisson Sim   113.1454 113.1454</code></pre>
 </div>
 </div>
-<p>In a simulation, the negative binomial is a much better fit to the original dataset. Therefore, continuing with for 7am and 8am we yield the following piecewise parameters:</p>
+<p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results. One possible solution (<em>Method 1</em>) is to simply divide the volume data by 15mins and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>               Mean Variance     Size
-6am (min)  113.2273 161.8030 263.9262
-7am (max)  232.8636 451.8377 247.6343
-8am (mean) 173.7273 324.2078 200.5653</code></pre>
+<pre><code>                 Mean  Variance      Size
+Vehicles/min 7.548485 0.7191246 -8.343333</code></pre>
+</div>
+</div>
+<p>Since this is now underdispersed, a Negative Binomial will no longer fit (hence the negative size). It remains unbiased, but erases so much of the original variance that it is completely irrelevant. An alternative solution (<em>Method 2</em>) that maintains our original variation is to use the divisible property of the Negative Binomial. We first form the model, then scale its parameters to maintain a dispersion that remains in proportion to the new, lower mean.</p>
+<blockquote class="blockquote">
+<p>This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if <span class="math inline">\(X=X_1 + X_2 +...+X_n \sim NBinom(k, p)\)</span> then we can model each <span class="math inline">\(X_i\)</span> as <span class="math inline">\(NBinom(\frac{k}{n}, p)\)</span> with the same probability <span class="math inline">\(p\)</span>. Extrapolating this <span class="math inline">\((_{successes}, \space _{probability})\)</span> form to the <span class="math inline">\((_{mean}, \space _{size})\)</span> form yields the parameters <span class="math inline">\((\frac{\mu}{n}, \space \frac{r}{n})\)</span>.</p>
+</blockquote>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                              Mean       Size
+Vehicles/15min          113.227273 263.926204
+Vehicles/min (Method 1)   7.548485  -8.343333
+Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
+</div>
+</div>
+<p>We can extend this idea from the 6am model to all three models.</p>
+<hr>
+<div class="caption">
+<p>Disaggregated Model Parameters (vehicles per min)</p>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                Mean     Size
+6am (min)   7.548485 17.59508
+7am (max)  15.524242 16.50895
+8am (mean) 11.581818 13.37102</code></pre>
 </div>
 </div>
 </section>
@@ -215,22 +231,94 @@ Poisson Sim   113.0900 113.0900</code></pre>
 <li><p>Interpretation in context</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>T <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># average 12 cars per minute release</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>release <span class="ot">&lt;-</span> <span class="dv">12</span> <span class="sc">*</span> <span class="dv">15</span> <span class="co">#no. of releases for 1 15 minute interval</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>qlength <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>T) {</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> qlength[i] <span class="sc">+</span> <span class="fu">rnbinom</span>(<span class="dv">1</span>, <span class="at">size=</span>ssize8, <span class="at">mu=</span>smu8)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="dv">0</span>, qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="sc">-</span> release)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qlength)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>T <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># average 12 cars per minute release</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>release <span class="ot">&lt;-</span> <span class="dv">12</span> <span class="sc">*</span> <span class="dv">15</span> <span class="co"># no. of releases for 1 15 minute interval</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>qlength <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>T) {</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> qlength[i] <span class="sc">+</span> <span class="fu">rnbinom</span>(<span class="dv">1</span>, <span class="at">size=</span>ssize8, <span class="at">mu=</span>smu8)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="dv">0</span>, qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="sc">-</span> release)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qlength)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># average 11 cars per minute</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>release <span class="ot">&lt;-</span> <span class="dv">11</span> <span class="sc">*</span> <span class="dv">15</span> <span class="co"># no. of releases for 1 15 minute interval</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>qlength <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>T) {</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> qlength[i] <span class="sc">+</span> <span class="fu">rnbinom</span>(<span class="dv">1</span>, <span class="at">size=</span>ssize8, <span class="at">mu=</span>smu8)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="dv">0</span>, qlength[i<span class="sc">+</span><span class="dv">1</span>] <span class="sc">-</span> release)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qlength)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/Simulating%20Testing-1.png" class="img-fluid" width="672"></p>
 </div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>T <span class="ot">&lt;-</span> <span class="dv">1000</span> <span class="co"># no. of timesteps (each is a 15min interval)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># no. of lanes</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fl">5.8</span> <span class="sc">*</span> <span class="dv">15</span> <span class="co"># mean no. vehicles released PER LANE in one timestep </span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> smu8 <span class="co"># mean no. vehicles arriving TOTAL in one timestep</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>dispersion <span class="ot">&lt;-</span> ssize8 <span class="co"># dispersion parameter for arrival rate</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>q1 <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>q2 <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>wtimes <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>q1c <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>q2c <span class="ot">&lt;-</span> <span class="fu">numeric</span>(T)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>avg_wait_at_i <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>T) {</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># arrivals</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  arrivals <span class="ot">&lt;-</span> <span class="fu">rnbinom</span>(<span class="dv">1</span>, <span class="at">size =</span> dispersion, <span class="at">mu =</span> lambda)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  q1a <span class="ot">&lt;-</span> <span class="fu">floor</span>(arrivals <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  q2a <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(arrivals <span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  q1 <span class="ot">&lt;-</span> <span class="fu">c</span>(q1, <span class="fu">rep</span>(i, q1a))</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  q2 <span class="ot">&lt;-</span> <span class="fu">c</span>(q2, <span class="fu">rep</span>(i, q2a))</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># release parameters</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  release <span class="ot">&lt;-</span> mu</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  timestep.wtimes <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># finding how many cars should be released</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  q1r <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">length</span>(q1), release)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  q2r <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">length</span>(q2), release)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># releasing cars and tracking how long they waited</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (q1r <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    timestep.wtimes <span class="ot">&lt;-</span> <span class="fu">c</span>(timestep.wtimes, i <span class="sc">-</span> q1[<span class="dv">1</span><span class="sc">:</span>q1r])</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    q1 <span class="ot">&lt;-</span> q1[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span>q1r)]</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (q2r <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    timestep.wtimes <span class="ot">&lt;-</span> <span class="fu">c</span>(timestep.wtimes, i <span class="sc">-</span> q2[<span class="dv">1</span><span class="sc">:</span>q2r])</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    q2 <span class="ot">&lt;-</span> q2[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span>q2r)]</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># record data</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  wtimes[[i]] <span class="ot">&lt;-</span> timestep.wtimes</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>  q1c[i] <span class="ot">&lt;-</span> <span class="fu">length</span>(q1)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>  q2c[i] <span class="ot">&lt;-</span> <span class="fu">length</span>(q2)</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>  avg_wait_at_i[i] <span class="ot">&lt;-</span> <span class="cf">if</span>(<span class="fu">length</span>(timestep.wtimes) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="fu">mean</span>(timestep.wtimes)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>all_waits <span class="ot">&lt;-</span> <span class="fu">unlist</span>(wtimes)</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(q1c)</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(1:T, avg_wait_at_i)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="conclusion-15-marks" class="level2">
@@ -253,6 +341,18 @@ Poisson Sim   113.0900 113.0900</code></pre>
 <li><p>Supplementary results</p></li>
 </ul>
 </section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p><em>2025 Annual Report | Main Roads Western Australia</em>. (2025). Wa.gov.au; Main Roads Western Australia.</p>
+<p><a href="https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf" class="uri">https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf</a></p>
+<p>Burmas, G. (2025, February 3). Perth drivers still not convinced by benefits of $200 million smart freeway. Abc.net.au; ABC News.</p>
+<p><a href="https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328" class="uri">https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328</a></p>
+<p>Righini, G. (2022).&nbsp;<em>Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory</em>.</p>
+<p><a href="https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf" class="uri">https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf</a></p>
+<p>‌Levinson, D. (2021, February 28). Engineering LibreTexts.</p>
+<p><a href="https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com" class="uri">https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com</a></p>
+<p>Siegrist, K. (2022, Apr 24). Statistics LibreTexts. <a href="#0">https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions</a></p>
+<p>‌</p>
 </section>
 
 </main>

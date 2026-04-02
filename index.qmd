@@ -1,6 +1,8 @@
 ---
 title: "A study of on-ramp metering in Perth"
-format: html
+format:
+  html:
+    css: styles.css
 editor: visual
 ---
 
@@ -26,7 +28,9 @@ Perth's freeway network has undergone major changes in recent years. One of the 
 
 In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to adjust and maximise release timing while maintaining stability of the system.
 
-A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (David Levinson, 2021).
+A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).
+
+<https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf>
 
 \*\* this is unfinished but just trying to get ideas
 
@@ -79,13 +83,6 @@ ramp23.pk.wk <- ramp23.wk[6 <= ramp23.wk$Hour & ramp23.wk$Hour < 10, ]
 
 # Removing public holidays (March 6 is the onyl date - Labour Day)
 ramp23.pk.wk <- ramp23.pk.wk[date(ramp23.pk.wk$Date.Time.AWST) != "2023-03-06", ]
-
-hist(ramp23.pk.wk$Volume)
-var(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume)
-mean(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume)
-
-var(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume/15)
-mean(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume/15)
 ```
 
 ## Methodology (25 marks)
@@ -142,9 +139,12 @@ abline(v = bp[9], col = "#252e1f", lwd = 3, lty = 2)
 text(x = bp[9], y = smax, labels = round(smeans$Volume[9], 2), pos = 3, xpd = TRUE)
 ```
 
-We can see that the volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am. We'll focus on the 6:00-6:15am interval for now:
+The volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am.
+
+We'll focus on the 6:00-6:15am interval for now:
 
 ```{r "Parameters for 6am model"}
+#| echo: false
 smu6  <- mean(ramp23.pk.wk[ramp23.pk.wk$Period == "06:00", 4])
 svar6 <- var(ramp23.pk.wk[ramp23.pk.wk$Period == "06:00", 4])
 
@@ -155,13 +155,12 @@ data.frame (
 )
 ```
 
-Even still, this is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mu and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID) We can calculate this size parameter $r$ as follows (**REFERENCEEEE**):
+This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID AND ALSO ASSUMPTION OF INDEPENDENCE REMAINS) We can calculate this size parameter $r$ as follows:
 
 $$r = \frac{\mu^2}{\sigma^2 - \mu}$$
 
 ```{r "Calculating 6am disperion factor"}
 #| include: false
-
 ssize6 <- (smu6^2) / (svar6 - smu6)
 ```
 
@@ -177,20 +176,66 @@ data.frame (
 )
 ```
 
-In a simulation, the negative binomial is a much better fit to the original dataset. Therefore, continuing with for 7am and 8am we yield the following piecewise parameters:
+The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results. One possible solution (*Method 1*) is to simply divide the volume data by 15mins and fit a new model. If we consider this case, our mean will scale by a factor of $\frac{1}{15}$, and the variance by a factor of $\frac{1}{15^2}$:
 
-```{r "Calculating 7am and 8am parameters"}
+```{r "Method 1 of reducing to Vehicles/Min"}
+#| echo: false
+data.frame(
+  Mean = smu6 / 15,
+  Variance = svar6 / 15^2,
+  Size = ((smu6/15)^2) / ((svar6/(15^2)) - smu6/15),
+  row.names = c("Vehicles/min")
+  )
+```
+
+Since this is now underdispersed, a Negative Binomial will no longer fit (hence the negative size). It remains unbiased, but erases so much of the original variance that it is completely irrelevant. An alternative solution (*Method 2*) that maintains our original variation is to use the divisible property of the Negative Binomial. We first form the model, then scale its parameters to maintain a dispersion that remains in proportion to the new, lower mean.
+
+> This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if $X=X_1 + X_2 +...+X_n \sim NBinom(k, p)$ then we can model each $X_i$ as $NBinom(\frac{k}{n}, p)$ with the same probability $p$. Extrapolating this $(_{successes}, \space _{probability})$ form to the $(_{mean}, \space _{size})$ form yields the parameters $(\frac{\mu}{n}, \space \frac{r}{n})$.
+
+```{r Compare methods 1 and 2 of reducing to Vehicles/Min}
+#| echo: false
+
+data.frame(
+  Mean = c(smu6, smu6/15, smu6/15),
+  Size = c(ssize6, ((smu6/15)^2) / ((svar6/(15^2)) - smu6/15), ssize6/15),
+  row.names = c("Vehicles/15min", "Vehicles/min (Method 1)", "Vehicles/min (Method 2)")
+)
+```
+
+We can extend this idea from the 6am model to all three models.
+
+------------------------------------------------------------------------
+
+::: caption
+Disaggregated Model Parameters (vehicles per min)
+:::
+
+```{r "Updating 6am and calculating 7am and 8am parameters to Vehicles/Min"}
 #| include: false
+
+# 6am models
+# leave as the same
 
 # 7am models
 smu7  <- mean(ramp23.pk.wk[ramp23.pk.wk$Period == "07:00", 4])
 svar7 <- var(ramp23.pk.wk[ramp23.pk.wk$Period == "07:00", 4])
-ssize7 <- (smu7^2) / (svar7 - smu7)
+ssize7 <- ((smu7^2) / (svar7 - smu7))
 
 # 8am models
 smu8  <- mean(ramp23.pk.wk[ramp23.pk.wk$Period == "08:00", 4])
 svar8 <- var(ramp23.pk.wk[ramp23.pk.wk$Period == "08:00", 4])
-ssize8 <- (smu8^2) / (svar8 - smu8)
+ssize8 <- ((smu8^2) / (svar8 - smu8))
+
+# update to vehicles / 15 minute
+# we no longer use variance! DO NOT TOUCHHHH VARIANCE
+smu6 <- smu6 / 15
+ssize6 <- ssize6 / 15
+
+smu7 <- smu7 / 15
+ssize7 <- ssize7 / 15
+
+smu8 <- smu8 / 15
+ssize8 <- ssize8 / 15
 ```
 
 ```{r "Showing parameters for all models"}
@@ -198,7 +243,6 @@ ssize8 <- (smu8^2) / (svar8 - smu8)
 
 data.frame(
   Mean = c(smu6, smu7, smu8),
-  Variance = c(svar6, svar7, svar8),
   Size = c(ssize6, ssize7, ssize8),
   row.names = c("6am (min)", "7am (max)", "8am (mean)")
 )
@@ -298,7 +342,7 @@ for (i in 1:T) {
 }
 all_waits <- unlist(wtimes)
 # plot(q1c)
-plot(1:T, avg_wait_at_i)
+# plot(1:T, avg_wait_at_i)
 ```
 
 ## Conclusion (15 marks)
@@ -335,8 +379,10 @@ Righini, G. (2022). *Introduction Probability distributions Birth-and-death pro
 
 <https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf>
 
-‌David Levinson (2021, February 28). Engineering LibreTexts.
+‌Levinson, D. (2021, February 28). Engineering LibreTexts.
 
 <https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com>
+
+Siegrist, K. (2022, Apr 24). Statistics LibreTexts. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](#0)
 
 ‌
