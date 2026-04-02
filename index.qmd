@@ -79,6 +79,13 @@ ramp23.pk.wk <- ramp23.wk[6 <= ramp23.wk$Hour & ramp23.wk$Hour < 10, ]
 
 # Removing public holidays (March 6 is the onyl date - Labour Day)
 ramp23.pk.wk <- ramp23.pk.wk[date(ramp23.pk.wk$Date.Time.AWST) != "2023-03-06", ]
+
+hist(ramp23.pk.wk$Volume)
+var(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume)
+mean(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume)
+
+var(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume/15)
+mean(ramp23.pk.wk[ramp23.pk.wk$Weekday == 4, ]$Volume/15)
 ```
 
 ## Methodology (25 marks)
