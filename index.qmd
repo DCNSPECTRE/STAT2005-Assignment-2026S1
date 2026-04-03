@@ -289,7 +289,8 @@ plot(qlength)
 trying new method
 
 ```{r}
-T <- 1000 # no. of timesteps (each is a minute)
+set.seed(1234)
+T <- 5000 # no. of timesteps (each is a minute)
 c <- 2 # no. of lanes
 
 mu <- 6 # mean no. vehicles released PER LANE in one timestep
@@ -304,6 +305,11 @@ wlength <- numeric(T)
 for (i in 1:T) {
   # arrivals
   arrivals <- rnbinom(1, size = dispersion, mu = lambda)
+  
+  if(i == 300) {
+    arrivals <- arrivals + 300 # TESTING VEHICLE INJECTION
+  }
+  
   queue <- c(queue, rep(i, arrivals))
 
   # release parameters
@@ -331,13 +337,19 @@ for (i in 1:T) {
   wtimes[[i]] <- mean(wtimes[[i]])
 }
 wtimes <- unlist(wtimes)
+mean(wtimes, na.rm = TRUE)
+```
+
+```{r}
 
 par(mfrow = c(1, 2))
-plot(wlength)
-plot(wtimes)
+plot(wlength, type="l")
+abline(v = 300)
+plot(wtimes, type="l")
 lines(cumsum(wtimes)/seq_len(T), col="red", lwd=3)
+lines(lowess(wtimes, f = 0.1), col="blue", lwd=3)
+abline(v = 300)
 
-mean(wtimes, na.rm = TRUE)
 ```
 
 old method:
