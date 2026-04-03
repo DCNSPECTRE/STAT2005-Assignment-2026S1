@@ -259,9 +259,8 @@ data.frame(
 ```{r "Simulating Testing"}
 T <- 1000
 
-
 # average 12 cars per minute release
-release <- 12 * 15 # no. of releases for 1 15 minute interval
+release <- 12
 
 qlength <- numeric(T)
 
@@ -275,7 +274,7 @@ plot(qlength)
 
 
 # average 11 cars per minute
-release <- 11 * 15 # no. of releases for 1 15 minute interval
+release <- 11
 
 qlength <- numeric(T)
 
@@ -287,62 +286,118 @@ for (i in 1:T) {
 plot(qlength)
 ```
 
+trying new method
+
 ```{r}
-T <- 1000 # no. of timesteps (each is a 15min interval)
+T <- 1000 # no. of timesteps (each is a minute)
 c <- 2 # no. of lanes
 
-mu <- 5.8 * 15 # mean no. vehicles released PER LANE in one timestep 
+mu <- 6 # mean no. vehicles released PER LANE in one timestep
 lambda <- smu8 # mean no. vehicles arriving TOTAL in one timestep
 dispersion <- ssize8 # dispersion parameter for arrival rate
 
-q1 <- c()
-q2 <- c()
+queue <- c()
 
 wtimes <- list()
-q1c <- numeric(T)
-q2c <- numeric(T)
-
-avg_wait_at_i <- list()
+wlength <- numeric(T)
 
 for (i in 1:T) {
   # arrivals
   arrivals <- rnbinom(1, size = dispersion, mu = lambda)
-  
-  q1a <- floor(arrivals / 2)
-  q2a <- ceiling(arrivals /2)
-  
-  q1 <- c(q1, rep(i, q1a))
-  q2 <- c(q2, rep(i, q2a))
-  
+  queue <- c(queue, rep(i, arrivals))
+
   # release parameters
-  release <- mu
-  timestep.wtimes <- c()
-  
+  rrate <- sum(rpois(c, mu))
+  rtimes <- c()
+
   # finding how many cars should be released
-  q1r <- min(length(q1), release)
-  q2r <- min(length(q2), release)
-  
+  released <- min(length(queue), rrate)
+
   # releasing cars and tracking how long they waited
-  if (q1r > 0) {
-    timestep.wtimes <- c(timestep.wtimes, i - q1[1:q1r])
-    q1 <- q1[-(1:q1r)]
+  if (released > 0) {
+    rtimes <- c(rtimes, i - queue[1:released])
+    queue <- queue[-(1:released)]
   }
-  if (q2r > 0) {
-    timestep.wtimes <- c(timestep.wtimes, i - q2[1:q2r])
-    q2 <- q2[-(1:q2r)]
-  }
-  
+
   # record data
-  wtimes[[i]] <- timestep.wtimes
-  q1c[i] <- length(q1)
-  q2c[i] <- length(q2)
-  
-  avg_wait_at_i[i] <- if(length(timestep.wtimes) > 0) mean(timestep.wtimes)
-  
+  wtimes[[i]] <- rtimes
+  wlength[i] <- length(queue)
+
 }
-all_waits <- unlist(wtimes)
+
+test <- wtimes
+
+for (i in 1:T) {
+  wtimes[[i]] <- mean(wtimes[[i]])
+}
+wtimes <- unlist(wtimes)
+
+par(mfrow = c(1, 2))
+plot(wlength)
+plot(wtimes)
+lines(cumsum(wtimes)/seq_len(T), col="red", lwd=3)
+
+mean(wtimes, na.rm = TRUE)
+```
+
+old method:
+
+```{r}
+# T <- 1000 # no. of timesteps (each is a 15min interval)
+# c <- 2 # no. of lanes
+# 
+# mu <- 6 # mean no. vehicles released PER LANE in one timestep
+# lambda <- smu8 # mean no. vehicles arriving TOTAL in one timestep
+# dispersion <- ssize8 # dispersion parameter for arrival rate
+# 
+# q1 <- c()
+# q2 <- c()
+# 
+# wtimes <- list()
+# q1c <- numeric(T)
+# q2c <- numeric(T)
+# 
+# avg_wait_at_i <- list()
+# 
+# for (i in 1:T) {
+#   # arrivals
+#   arrivals <- rnbinom(1, size = dispersion, mu = lambda)
+# 
+#   q1a <- floor(arrivals / 2)
+#   q2a <- ceiling(arrivals /2)
+# 
+#   q1 <- c(q1, rep(i, q1a))
+#   q2 <- c(q2, rep(i, q2a))
+# 
+#   # release parameters
+#   release <- mu
+#   timestep.wtimes <- c()
+# 
+#   # finding how many cars should be released
+#   q1r <- min(length(q1), release)
+#   q2r <- min(length(q2), release)
+# 
+#   # releasing cars and tracking how long they waited
+#   if (q1r > 0) {
+#     timestep.wtimes <- c(timestep.wtimes, i - q1[1:q1r])
+#     q1 <- q1[-(1:q1r)]
+#   }
+#   if (q2r > 0) {
+#     timestep.wtimes <- c(timestep.wtimes, i - q2[1:q2r])
+#     q2 <- q2[-(1:q2r)]
+#   }
+# 
+#   # record data
+#   wtimes[[i]] <- timestep.wtimes
+#   q1c[i] <- length(q1)
+#   q2c[i] <- length(q2)
+# 
+#   avg_wait_at_i[i] <- if(length(timestep.wtimes) > 0) mean(timestep.wtimes)
+# 
+# }
+# all_waits <- unlist(wtimes)
 # plot(q1c)
-# plot(1:T, avg_wait_at_i)
+# # plot(1:T, avg_wait_at_i)
 ```
 
 ## Conclusion (15 marks)
