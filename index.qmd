@@ -290,10 +290,10 @@ trying new method
 
 ```{r}
 set.seed(1234)
-T <- 1000 # no. of timesteps (each is a minute) #### 250 timesteps helps to see stuff better
+T <- 500 # no. of timesteps (each is a minute) #### 250 timesteps helps to see stuff better
 c <- 2 # no. of lanes
 
-mu <- 7 # mean no. vehicles released PER LANE in one timestep
+mu <- 6 # mean no. vehicles released PER LANE in one timestep
 lambda <- smu8 # mean no. vehicles arriving TOTAL in one timestep
 dispersion <- ssize8 # dispersion parameter for arrival rate
 
@@ -309,10 +309,10 @@ for (i in 1:T) {
   arrivals <- rnbinom(1, size = dispersion, mu = lambda)
   
   if(i == 200) {
-    # arrivals <- arrivals + 100 # TESTING VEHICLE INJECTION
+    arrivals <- arrivals + 100 # TESTING VEHICLE INJECTION
     # TESTING PIECEWISE
-    lambda <- smu7
-    dispersion <- ssize7
+    # lambda <- smu7
+    # dispersion <- ssize7
   }
   
   queue <- c(queue, rep(i, arrivals))
@@ -346,32 +346,40 @@ for (i in 1:T) {
 wtimes <- unlist(wtimes)
 mean(wtimes, na.rm = TRUE)
 mean(wlength, na.rm = TRUE)
+
+cleanwtimes <- wtimes
+cleanwtimes[is.na(cleanwtimes)] <- 0
+k <- 20 # 10 averages
+movingavg <- filter(cleanwtimes, rep(1/k, k), sides = 1)
 ```
 
 ```{r}
-
 par(mfrow = c(1, 2))
 # queue length plot
 plot(wlength, type="l", xlab="Timestep", ylab="Count of Vehicles", cex.axis = 0.8, col="#b5b5b5", main="Length of Queue")
 # abline(v = 300, lwd=2, col="#737373")
 
 # time spent waiting plot
-plot(wtimes, type="l", xlab="Timestep", ylab="Time Spent (mins)", cex.axis = 0.8, col="#b5b5b5", main = "Queue Time")
+plot(wtimes, type="l", xlab="Timestep", ylab="Time Spent (mins)", cex.axis = 0.8, col="#b5b5b5", main = "Timing of Queue")
 # abline(v = 300, lwd=2, col="#737373")
 lines(cumsum(wtimes)/seq_len(T), lwd=2)
+# lines(movingavg, col="blue", lwd=2)
 
 # hysteresis plot
 plot(wlength, wtimes)
 
 # incoming vs outgoing
-plot(cumsum(incoming), type="l", col="red")
+plot(cumsum(incoming), type="l", col="red", xlab="Timestep", ylab="Cumulative Count", main="Arrivals and Departures")
 lines(cumsum(outgoing), type="l", col="blue")
+legend("bottomright", legend=c("Arrivals", "Departures"), col=c("red", "blue"), lty=1, bty="n")
+# t.test(lm(cumsum(outgoing[1:100]) ~ seq(1, 100)), lm(cumsum(outgoing[200:300]) ~ seq(200:300)), paired = TRUE)
 
 # another incoming vs outgoing
 plot(cumsum(outgoing), cumsum(incoming), type="l")
 
 # one more
 plot(cumsum(incoming) / cumsum(outgoing))
+plot(incoming / outgoing)
 
 # level of service
 hist(wtimes)
