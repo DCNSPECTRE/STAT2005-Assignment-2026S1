@@ -30,6 +30,8 @@ In order to weigh the validitity of these claims, this study will analyse the ti
 
 A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).
 
+**The primary aim of this study is the determine whether the reported 7-minute travel time savings on the Kwinana Freeway Northbound and Mitchell Freeway Southbound are negated by the increased on-ramp queuing times for local residents. This will be evaluated by developing a queuing simulation based on historical traffic volume data.**
+
 <https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf>
 
 \*\* this is unfinished but just trying to get ideas
@@ -103,7 +105,11 @@ head(ramp23[, c(-6, -7, -8, -9, -10)])
 
 TALK ABOUT MEMORYLESS PROPERTY AS A FALLBACK/ASSUMPTION
 
-In order to construct a queuing model, we can use this dataset to simulate the incoming volume of traffic during the morning peak. Typically, this model would be formed on the Poisson distribution because of its memoryless property and ease of implementation. However, a Poisson distribution assumes an equal mean and variance, so it's important that verify this assumption. To visualise, let's filter the above for weekdays, the peak hours, and without public holidays (eg 06/03/23 – Labour Day), yielding the following:
+In order to construct a queuing model, we can use this dataset to simulate the incoming volume of traffic during the morning peak. Typically, this model would be formed on the Poisson distribution because of its memoryless property and ease of implementation.
+
+> It is important to discuss the memoryless property of the poisson process as this implies that the probability of future events is completely **independent** of the past as the process is unable to 'mathematically determine' the time that has passed since the last event. This makes it an ideal process to use as we can model extreme conditions such as traffic accidents whilst ensuring that they remain completely independent of the other events.
+
+However, a Poisson distribution assumes an equal mean and variance, so it's important that verify this assumption. To visualise, let's filter the above for weekdays, the peak hours, and without public holidays (eg 06/03/23 – Labour Day), yielding the following:
 
 ```{r "Aggregating average daily volumes"}
 #| include: false
@@ -155,7 +161,11 @@ data.frame (
 )
 ```
 
-This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID AND ALSO ASSUMPTION OF INDEPENDENCE REMAINS) We can calculate this size parameter $r$ as follows:
+This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID AND ALSO ASSUMPTION OF INDEPENDENCE REMAINS)
+
+| It is important to note that, whilst we eliminate the memoryless aspect of the Poisson Process, we still retain independence with the Negative Binomial distribution. In fact, it makes a better proposition compared to the Poisson Process, as we are able to handle overdispersion in the data set which allows for more accurate modelling of accidents, and in high congestion traffic zones which makes it ideal for this studies case.
+
+We can calculate this size parameter $r$ as follows:
 
 $$r = \frac{\mu^2}{\sigma^2 - \mu}$$
 
