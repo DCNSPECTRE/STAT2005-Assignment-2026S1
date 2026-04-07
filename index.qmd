@@ -24,6 +24,8 @@ editor: visual
 
 -   Brief literature review (3-5 relevant sources)
 
+Background \<- reid highway is arguably one of the most important links in with the mitchell freeway (only highway-freeway interchange, all others are residential avenues, important for transit of goods + people)
+
 Perth's freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth's outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (Main Roads, 2025). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (ABC, 2025).
 
 In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to adjust and maximise release timing while maintaining stability of the system.
@@ -282,50 +284,7 @@ Secondary points:
 
 -   Conduct sensitivity analysis on arrival and service rates
 
-```{r "Injection"}
-#| include: false
-
-yes <- 2
-
-# if(i == 200) {
-#   arrivals <- arrivals + 100 # TESTING VEHICLE INJECTION
-#   # TESTING PIECEWISE
-#   # lambda <- smu7
-#   # dispersion <- ssize7
-# }
-
-# add another thing to add a temp lane when queue is a certain length
-# maybe add optional parameters at end? if you dont input them then sim ignores it 
-
-# FOR THE SIMULATION BELOW
-# alambda refers to TOTAL arrival rate /min
-# asize refers to dispersion parameter
-# rmu refers to PER LANE departure rate /min
-# c refers to number of lanes
-```
-
-For the simulation, we can develop a queuing model based on the parameters described above. For each model, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{1 \times c}{\lambda}$ whichs allows us to determine the largest timing possible for each system to remain stable.
-
-As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form an M/D/2 queue.
-
-```{r "Calculating departure rates"}
-#| echo: false
-
-c <- 2
-
-rmu6 <- smu6/c
-rmu7 <- smu7/c
-rmu8 <- smu8/c
-
-data.frame(
-  Best = c(smu6, rmu6),
-  Worst = c(smu7, rmu7),
-  Average = c(smu8, rmu8),
-  row.names = c("Arrival Rate", "Departure Rate")
-)
-```
-
-Below is the function we have designed for the simulation:
+For the simulation, we can develop a series of queuing models based on the parameters described above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/M/c queue with Negative Binomial arrivals.
 
 ```{r "Primary Simulation"}
 onRampSimulation <- function(steps, alambda, asize, rmu, c) {
@@ -409,9 +368,38 @@ runMultiSims <- function(steps, alambdas, asizes, rmus, c){
 }
 ```
 
-### Investigating utilisation rate
+It's also important that we define the maximum capacity of the road segment before continuing with the simulation. This will not influence the arrival of vehicles (beyond scope) but it will help to influence the results as we can determine when the system 'spills back' onto the previous set of signals.
 
-We can run the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models:
+According to Google Earth, the length of road preceding the on-ramp signal is:
+
+-   Single lane: 330m
+
+-   Double lane: 120m
+
+We can also source an effective length for a passenger car in a queue of about 8.5m from Main Roads, accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
+
+### Part 1 - Sensitivity Analysis
+
+For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{1 \times c}{\lambda}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form an G/M/2 queue.
+
+```{r "Calculating departure rates"}
+#| echo: false
+
+c <- 2
+
+rmu6 <- smu6/c
+rmu7 <- smu7/c
+rmu8 <- smu8/c
+
+data.frame(
+  Best = c(smu6, rmu6),
+  Worst = c(smu7, rmu7),
+  Average = c(smu8, rmu8),
+  row.names = c("Arrival Rate", "Departure Rate")
+)
+```
+
+We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models:
 
 ::: caption
 Best, Worst and Average Case Simulations (at critical points)
@@ -448,13 +436,64 @@ paste("Maximum length:", maxqueue)
 
 While in all cases there is theoretical stability (i.e. the models all return to 0), we can see that a utilisation rate of exactly $1$ is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.
 
-We can use this information to investigate the systems overall impact in travel-times.
+Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a summary of the queue length throughout the simulation:
 
-------------------------------------------------------------------------
+```{r "7am Queue Length Summary"}
+summary(sims[[2]]$wlength)
+```
 
-### Investigating net travel-time impact
+This confirms a 100% utilisation rate is unrealistic. We can investigate how sensitive the system is to find a more reasonable mu and its corresponding releaes rate.
 
-As mentioned, Main Roads has a proposed 7-minute improvement in Southbound travel times following the implementation of Smart Freeways. This is calculated from Hester Avenue (Clarkson) to Vincent Street (Leederville), but there are no defined figures from Reid Highway specifically.
+```{r "7am Analysis"}
+#| echo: false
+
+steps <- 1000
+rmus <- seq(3, 15)
+count <- length(rmus)
+c <- 2
+
+sims <- runMultiSims(steps, rep(smu7, count), rep(ssize7, count), rmus, c)
+inoutrate <- sapply(sims$sims, function(x) mean(x$incoming/x$outgoing))
+meanlength <- sapply(sims$sims, function(x) mean(x$wlength))
+
+par(mfrow=c(1, 2))
+plot(rmus, inoutrate, main="Incoming/Outgoing Rate", ylab="Rate Parameter", xlab="Mu", pch=16, col="#b5b5b5")
+abline(v=8, col="red", lwd = 2)
+plot(rmus, meanlength, col="#b5b5b5", main="Mean Queue Length (1000)", ylab="Length of Queue", xlab="Mu")
+abline(v=8, col="red", lwd = 2)
+```
+
+SPILLBACK STUFFF!!!!
+
+### Part 2 - Transient Response
+
+do stuff with switching between models as well!!!!! like after 1000 timesteps go from smu6 to smu7 and if queue length is above something add a 3rd lane
+
+```{r "Injection"}
+#| include: false
+
+yes <- 2
+
+# if(i == 200) {
+#   arrivals <- arrivals + 100 # TESTING VEHICLE INJECTION
+#   # TESTING PIECEWISE
+#   # lambda <- smu7
+#   # dispersion <- ssize7
+# }
+
+# add another thing to add a temp lane when queue is a certain length
+# maybe add optional parameters at end? if you dont input them then sim ignores it 
+
+# FOR THE SIMULATION BELOW
+# alambda refers to TOTAL arrival rate /min
+# asize refers to dispersion parameter
+# rmu refers to PER LANE departure rate /min
+# c refers to number of lanes
+```
+
+### Part 3 - Overall System Impact
+
+Main Roads has a proposed 7-minute improvement in Southbound travel times following the implementation of Smart Freeways. This is calculated from Hester Avenue (Clarkson) to Vincent Street (Leederville), but there are no defined figures from Reid Highway specifically.
 
 We can estimate this through the proportion of lengths:
 
@@ -466,11 +505,7 @@ If we assume that time improvements are uniform across the freeway, we can equat
 
 Consider the maximum, worst-case model (i.e. at 7am):
 
-```{r "7am Analysis"}
-#| echo: false
-
-par(mfrow = c(1, 2))
-
+```{r}
 # testing 90% utilisation
 sim90 <- onRampSimulation(1000, smu7, ssize7, rmu7 / 0.9, 2)
 hist(sim90$wtimesavg, main = "7am, p=90%", xlab="Waiting Time (minutes)", breaks = 5)
@@ -510,7 +545,7 @@ $$
 H_a = p > p_o
 $$
 
-For a threshold of 10% (i.e. $p_o=0.1$) and at 95% confidence, we yield:
+For a threshold of 10% (i.e. $p_o=0.1$) and at 95% confidence, see:
 
 ```{r "Proportion Test"}
 #| echo: false
@@ -530,27 +565,7 @@ summary(sim95$wtimesavg)
 
 A majority of drivers are still waiting under 1 minute
 
-------------------------------------------------------------------------
-
-### Transient response analysis
-
-ADD SPILLBACK TO EVERYTHING ABOVE
-
-**Spillback Investigation**
-
-Length of single lane - 330m
-
-Length of double lane - 120m
-
-Combined 'single lane equivalent' length - 570m
-
-FIND SOURCES FOR INFO
-
-<https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf>
-
-A passenger vehicle has an effective length of about 8.5m according to MainRoads.
-
-Therefore our capacity before spillback occurs is approximately 570/8.5 = 67 passenger cars.
+### other stufffffff
 
 ```{r}
 # PLOTTING BANK
@@ -590,9 +605,31 @@ plot(incoming / outgoing)
 
 # level of service
 hist(wtimesall)
+
+
+# SENSITIVITY THING I DIDNT LIKE
+steps <- 1000
+rmus <- c(6, 7, 8)
+count <- length(rmus)
+c <- 2
+
+sims <- runMultiSims(steps, rep(smu7, count), rep(ssize7, count), rmus, c)$sims
+
+par(mfrow = c(1, count))
+for (i in seq_along(rmus)) {
+  plot(
+    sims[[i]]$wlength,
+    type = "l",
+    xlab = "Timestep",
+    ylab = "Count of Vehicles",
+    cex.axis = 0.8,
+    col = "#b5b5b5",
+    main = paste("Mu =", round(rmus[i], 2))
+  )
+}
 ```
 
-Conclusion (15 marks)
+## Conclusion (15 marks)
 
 -   Discussion of results
 
@@ -601,6 +638,10 @@ Conclusion (15 marks)
 -   Possible extensions (future work)
 
 -   Practical implications
+
+limitation - spillback does not influence arrival rates (drivers may choose other paths)
+
+limitation - assuming travel time improvement from main roads is uniformly distributed (probably more time saved when you are further away than closer)
 
 ## Contributions
 
@@ -632,4 +673,6 @@ Righini, G. (2022). *Introduction Probability distributions Birth-and-death pro
 
 Siegrist, K. (2022, Apr 24). Statistics LibreTexts. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](#0)
 
-‌
+‌*Traffic Control -Avoiding End of Queue Collisions on High Speed Roads*. (2018). Main Roads.
+
+<https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf>
