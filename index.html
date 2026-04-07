@@ -234,8 +234,8 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.1103 159.8535
-Poisson Sim   113.2668 113.2668</code></pre>
+NBinom Sim    113.3585 161.2969
+Poisson Sim   113.1233 113.1233</code></pre>
 </div>
 </div>
 <p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results. One possible solution (<em>Method 1</em>) is to simply divide the volume data by 15mins and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
@@ -339,10 +339,10 @@ Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
 <p>It’s also important that we define the maximum capacity of the road segment before continuing with the simulation. This will not influence the arrival of vehicles (beyond scope) but it will help to influence the results as we can determine when the system ‘spills back’ onto the previous set of signals.</p>
 <p>According to Google Earth, the length of road preceding the on-ramp signal is:</p>
 <ul>
-<li><p>Single lane: 330m</p></li>
+<li><p>Single lane: 330m, and</p></li>
 <li><p>Double lane: 120m</p></li>
 </ul>
-<p>We can also source an effective length for a passenger car in a queue of about 8.5m from Main Roads, accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
+<p>We can also source an 8.5m effective length for one passenger car in a queue from Main Roads, accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
 <section id="part-1---sensitivity-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="part-1---sensitivity-analysis">Part 1 - Sensitivity Analysis</h3>
 <p>For each model we have developed, consider the critical point where the utilisation parameter <span class="math inline">\(\rho\)</span> is exactly one. Rearranging in terms of the release rate, we find <span class="math inline">\(\mu = \frac{1 \times c}{\lambda}\)</span> whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set <span class="math inline">\(c=2\)</span> and form an G/M/2 queue.</p>
@@ -435,7 +435,7 @@ H_0 = p \leq p_o\
 <p><span class="math display">\[
 H_a = p &gt; p_o
 \]</span></p>
-<p>For a threshold of 10% (i.e.&nbsp;<span class="math inline">\(p_o=0.1\)</span>) and at 95% confidence, we yield:</p>
+<p>For a threshold of 10% (i.e.&nbsp;<span class="math inline">\(p_o=0.1\)</span>) and at 95% confidence, see:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>                  P_Value Proportion

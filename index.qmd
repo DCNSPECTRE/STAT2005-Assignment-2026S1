@@ -372,11 +372,11 @@ It's also important that we define the maximum capacity of the road segment befo
 
 According to Google Earth, the length of road preceding the on-ramp signal is:
 
--   Single lane: 330m
+-   Single lane: 330m, and
 
 -   Double lane: 120m
 
-We can also source an effective length for a passenger car in a queue of about 8.5m from Main Roads, accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
+We can also source an 8.5m effective length for one passenger car in a queue from Main Roads, accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
 
 ### Part 1 - Sensitivity Analysis
 
@@ -434,21 +434,17 @@ paste("Maximum length:", maxqueue)
 
 ```
 
-While in all cases there is theoretical stability (i.e. the models all return to 0), we can see that a utilisation rate of exactly $1$ is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.
+While in all cases there is theoretical stability (i.e. the models will all return to 0), we can see that a utilisation rate of exactly $1$ is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.
 
-Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a summary of the queue length throughout the simulation:
+In order to locate a more precise release rate,
 
-```{r "7am Queue Length Summary"}
-summary(sims[[2]]$wlength)
-```
-
-This confirms a 100% utilisation rate is unrealistic. We can investigate how sensitive the system is to find a more reasonable mu and its corresponding releaes rate.
+Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a plot of the ratio of arrival-to-depature counts for a series of release rates $\mu$. This ratio can be $1$ at minimum as we can only have as many vehicles departing as there were vehicles that arrived in the first place. However, when the system is past stability this ratio is unbounded.
 
 ```{r "7am Analysis"}
 #| echo: false
 
 steps <- 1000
-rmus <- seq(3, 15)
+rmus <- seq(2, 15)
 count <- length(rmus)
 c <- 2
 
@@ -457,11 +453,56 @@ inoutrate <- sapply(sims$sims, function(x) mean(x$incoming/x$outgoing))
 meanlength <- sapply(sims$sims, function(x) mean(x$wlength))
 
 par(mfrow=c(1, 2))
-plot(rmus, inoutrate, main="Incoming/Outgoing Rate", ylab="Rate Parameter", xlab="Mu", pch=16, col="#b5b5b5")
+plot(rmus, inoutrate, main="Incoming/Outgoing Ratio", ylab="Rate Parameter", xlab="Mu", pch=16, col="#b5b5b5")
 abline(v=8, col="red", lwd = 2)
-plot(rmus, meanlength, col="#b5b5b5", main="Mean Queue Length (1000)", ylab="Length of Queue", xlab="Mu")
+plot(rmus, meanlength, col="#b5b5b5", main="Mean Queue Length", ylab="Length of Queue", xlab="Mu")
 abline(v=8, col="red", lwd = 2)
 ```
+
+For approximately $\mu < 8$ , we can see an inverse-exponential growth in the ratio of incoming-to-outgoing vehicles. This suggests that the queuing model is highly sensitive to changes in its departure rate as we approach (and pass) the critical threshold. Shifting focus to the mean queue length, we see a negative linear shape beginning at this same critical point.
+
+Consider now a
+
+```{r "7am Analysis Continued"}
+#| echo: false
+
+steps <- 2000
+rmus <- seq(6, 10, 0.5)
+count <- length(rmus)
+c <- 2
+
+# making pretty gradient
+base_col <- "darkgray"
+alphas <- seq(0.2, 1, length.out = count)
+cols <- mapply(function(a) adjustcolor(base_col, alpha.f = a), alphas)
+
+sims <- runMultiSims(steps, rep(smu7, count), rep(ssize7, count), rmus, c)$sims
+
+plot(
+    cumsum(sims[[1]]$incoming) / cumsum(sims[[1]]$outgoing),
+    type = "l",
+    xlab = "Timestep",
+    ylab = "Ratio Value",
+    cex.axis = 0.8,
+    col = cols[1],
+    main = "Cumulative Incoming / Cumulative Outgoing"
+  )
+
+for (i in seq_along(rmus[-1])) {
+  lines(
+    cumsum(sims[[i]]$incoming) / cumsum(sims[[i]]$outgoing),
+    col=cols[i]
+    )
+}
+
+legend("topright", legend = rmus, col = cols, lty = 1, lwd = 2, title = "Mu Values", bty = "n", cex = 0.8)
+```
+
+We need this to trend near 1 for long-term values, otherwise we consistently have
+
+We can see this mimics the exponential growth we saw earlier (it is the same parameter i think?)
+
+maybe need to do something else more ddata based instead of graphical...
 
 SPILLBACK STUFFF!!!!
 
@@ -569,7 +610,7 @@ A majority of drivers are still waiting under 1 minute
 
 ```{r}
 # PLOTTING BANK
-data <- onRampSimulation(steps=5000, alambda=smu6, asize=ssize6, rmu=rmu6, c=2)
+data <- onRampSimulation(steps=5000, alambda=smu6, asize=ssize6, rmu=(rmu6 - 0), c=2)
 incoming <- data$incoming
 outgoing <- data$outgoing
 wtimesavg <- data$wtimesavg
@@ -606,6 +647,7 @@ plot(incoming / outgoing)
 # level of service
 hist(wtimesall)
 
+plot(cumsum(incoming) / cumsum(outgoing))
 
 # SENSITIVITY THING I DIDNT LIKE
 steps <- 1000
