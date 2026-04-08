@@ -380,7 +380,7 @@ We can also source an 8.5m effective length for one passenger car in a queue fro
 
 ### Part 1 - Sensitivity Analysis
 
-For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{1 \times c}{\lambda}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form an G/M/2 queue.
+For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{\lambda}{1 \times c}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form an G/M/2 queue.
 
 ```{r "Calculating departure rates"}
 #| echo: false
@@ -436,9 +436,7 @@ paste("Maximum length:", maxqueue)
 
 While in all cases there is theoretical stability (i.e. the models will all return to 0), we can see that a utilisation rate of exactly $1$ is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.
 
-In order to locate a more precise release rate,
-
-Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a plot of the ratio of arrival-to-depature counts for a series of release rates $\mu$. This ratio can be $1$ at minimum as we can only have as many vehicles departing as there were vehicles that arrived in the first place. However, when the system is past stability this ratio is unbounded.
+Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a plot of the ratio of arrival-to-depature counts for a series of release rates $\mu$. This ratio can be $1$ at minimum as we can only have as many vehicles departing as there were vehicles that have arrived in the first place. However, when the system is past stability this ratio is unbounded.
 
 ```{r "7am Analysis"}
 #| echo: false
@@ -449,32 +447,42 @@ count <- length(rmus)
 c <- 2
 
 sims <- runMultiSims(steps, rep(smu7, count), rep(ssize7, count), rmus, c)
-inoutrate <- sapply(sims$sims, function(x) mean(x$incoming/x$outgoing))
-meanlength <- sapply(sims$sims, function(x) mean(x$wlength))
+# inoutrate <- sapply(sims$sims, function(x) mean(x$incoming/x$outgoing))
+inoutrate <- sapply(sims$sims, function(x) sum(x$incoming)/sum(x$outgoing))
+meanlength <- sapply(sims$sims, function(x) mean(x$wlength)/steps) # /steps to normalise
 
 par(mfrow=c(1, 2))
 plot(rmus, inoutrate, main="Incoming/Outgoing Ratio", ylab="Rate Parameter", xlab="Mu", pch=16, col="#b5b5b5")
 abline(v=8, col="red", lwd = 2)
-plot(rmus, meanlength, col="#b5b5b5", main="Mean Queue Length", ylab="Length of Queue", xlab="Mu")
+plot(rmus, meanlength, col="#b5b5b5", main="Normalised Queue Length", ylab="Length of Queue / Timesteps", xlab="Mu")
 abline(v=8, col="red", lwd = 2)
+
+paste("Recall that the incoming rate is", round(smu7, 2), "with a critical Mu of", round(rmu7, 2))
 ```
 
-For approximately $\mu < 8$ , we can see an inverse-exponential growth in the ratio of incoming-to-outgoing vehicles. This suggests that the queuing model is highly sensitive to changes in its departure rate as we approach (and pass) the critical threshold. Shifting focus to the mean queue length, we see a negative linear shape beginning at this same critical point.
+For $\mu < 8$ there is an unbounded exponential growth in the ratio of incoming-to-outgoing vehicles as was expected. For $\mu \geq 8$, this ratio is clamped at one (ignoring random variation). A larger ratio means there are consistently more vehicles arriving than the system can output, and so if this is above one total breakdown will occur.
 
-Consider now a
+This suggests that the queuing model is highly sensitive to changes in its departure rate past the critical utilisation rate $\rho \geq 1$. To investigate further, we can shift focus to the normalised queue length plot on the right. Here, notice the linear shape past the same critical point. We can define this region by the line:
+
+```{r "Above 1 Sensitivity"}
+slope <- lm(meanlength[rmus < 8] ~ rmus[rmus < 8], )
+summary(slope)
+```
+
+We find a slope of $-1.002 \approx -1$, suggesting that for every unit increase in $\mu$ getting closer to the critical point, we lose a unit of length in the queue. So interestingly, while the ratio parameter seems to grow exponentially, the relationship between the resulting length of the queue for a given release rate $\mu$ is linear.
+
+Let's now shift focus to the sensitivity of the system while $\rho < 1$.
 
 ```{r "7am Analysis Continued"}
 #| echo: false
 
 steps <- 2000
-rmus <- seq(6, 10, 0.5)
+rmus <- seq(7.5, 9, 0.25)
 count <- length(rmus)
 c <- 2
 
-# making pretty gradient
-base_col <- "darkgray"
-alphas <- seq(0.2, 1, length.out = count)
-cols <- mapply(function(a) adjustcolor(base_col, alpha.f = a), alphas)
+# can delete shite above
+cols <- hcl.colors(length(rmus), "Viridis")
 
 sims <- runMultiSims(steps, rep(smu7, count), rep(ssize7, count), rmus, c)$sims
 
@@ -488,7 +496,8 @@ plot(
     main = "Cumulative Incoming / Cumulative Outgoing"
   )
 
-for (i in seq_along(rmus[-1])) {
+# need to replot 1 so it shows ontop
+for (i in seq_along(rmus)) {
   lines(
     cumsum(sims[[i]]$incoming) / cumsum(sims[[i]]$outgoing),
     col=cols[i]
@@ -498,11 +507,38 @@ for (i in seq_along(rmus[-1])) {
 legend("topright", legend = rmus, col = cols, lty = 1, lwd = 2, title = "Mu Values", bty = "n", cex = 0.8)
 ```
 
-We need this to trend near 1 for long-term values, otherwise we consistently have
+As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two $\mu$ values which are clearly disjoint from the rest. For approximately $\mu > 7.75$, blah blah
 
-We can see this mimics the exponential growth we saw earlier (it is the same parameter i think?)
+```{r "Below 1 Sensitivity"}
+#| echo: false
 
-maybe need to do something else more ddata based instead of graphical...
+# use sims from above
+
+rmus <- rmus[-1]
+sims <- sims[-1]
+
+plotlist <- lapply(sims, function(x) x$wtimesall)
+names(plotlist) <- rmus
+
+boxplot(plotlist, 
+        horizontal=TRUE, 
+        las=1,
+        col=hcl.colors(length(rmus), "Viridis"),
+        xlab="Wait Time (min)", 
+        ylab="Release Rate (Mu)",
+        main="Wait Time Variability across Mu Values",
+        outline=FALSE)
+```
+
+It takes until $\mu = 8.75$ for there to be no appreciable wait time at the on-ramp, corresponding to a utilisation rate of $\frac{15.5}{2 \times 8.75} = 88.7\%$. A
+
+```{r "Utilisation rate calculation"}
+smu7 / (c * 8.75)
+```
+
+A realistic rate appears to be between mu = 8.75 and 8.5
+
+simulate and compare these! include spillback!
 
 SPILLBACK STUFFF!!!!
 
