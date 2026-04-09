@@ -380,7 +380,7 @@ We can also source an 8.5m effective length for one passenger car in a queue fro
 
 ### Part 1 - Sensitivity Analysis
 
-For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{\lambda}{1 \times c}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form an G/M/2 queue.
+For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{\lambda}{1 \times c}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form a G/M/2 queue.
 
 ```{r "Calculating departure rates"}
 #| echo: false
@@ -476,8 +476,8 @@ Let's now shift focus to the sensitivity of the system while $\rho < 1$.
 ```{r "7am Analysis Continued"}
 #| echo: false
 
-steps <- 2000
-rmus <- seq(7.5, 9, 0.25)
+steps <- 5000
+rmus <- c(7.5, round(rmu7, 4), seq(8, 9, 0.25))
 count <- length(rmus)
 c <- 2
 
@@ -507,17 +507,17 @@ for (i in seq_along(rmus)) {
 legend("topright", legend = rmus, col = cols, lty = 1, lwd = 2, title = "Mu Values", bty = "n", cex = 0.8)
 ```
 
-As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two $\mu$ values which are clearly disjoint from the rest. For approximately $\mu > 7.75$, blah blah
+As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two $\mu$ values which are clearly disjoint from the rest. We can therefore say that for $\mu > 7.76$, the lines appear to converge and return back to $1.00$.
 
 ```{r "Below 1 Sensitivity"}
 #| echo: false
 
 # use sims from above
 
-rmus <- rmus[-1]
-sims <- sims[-1]
+rmus <- rmus[c(-1, -2)]
+sims <- sims[c(-1, -2)]
 
-plotlist <- lapply(sims, function(x) x$wtimesall)
+plotlist <- lapply(sims, function(x) x$wtimesavg)
 names(plotlist) <- rmus
 
 boxplot(plotlist, 
@@ -527,20 +527,61 @@ boxplot(plotlist,
         xlab="Wait Time (min)", 
         ylab="Release Rate (Mu)",
         main="Wait Time Variability across Mu Values",
-        outline=FALSE)
+        outline=TRUE,
+        cex=0.8
+        )
 ```
 
-It takes until $\mu = 8.75$ for there to be no appreciable wait time at the on-ramp, corresponding to a utilisation rate of $\frac{15.5}{2 \times 8.75} = 88.7\%$. A
+> This is a plot of average wait-times for each timestep, allowing us to achieve sub-1-minute resolution. This slighly reduces the maximum wait-times seen but greatly aides the visualisation.
 
-```{r "Utilisation rate calculation"}
-smu7 / (c * 8.75)
+There is a clear exponential growth for the boxplots as $\mu \rightarrow 8$, or in other terms $\rho \rightarrow 1$:
+
+-   the median wait time for vehicles increases;
+
+-   it's IQR widens; so we have more uncertainty if quoting a given mean
+
+-   the whiskers grow far longer; so outlier vehicles will notice a disproportionally extreme increase in wait time
+
+Choosing to ignore the outliers, a reasonable choice that fits everyday, predicable traffic would be $\mu=8.25$.
+
+```{r}
+summary(plotlist$"8.25")
 ```
 
-A realistic rate appears to be between mu = 8.75 and 8.5
+Here, 75% of drivers are waiting under $2.2$ minutes with a median of $1$ minute. However, notice the maximum wait-time of $16$ minutes. This system would benefit from live feedback, as it can maintain a smaller $\mu$ when under regular operation, but if a spike occurs this can increase to prevent the queue from ballooning as is occuring here.
 
-simulate and compare these! include spillback!
+Instead considering the outliers, takes until $\mu = 8.75$ for there to be no appreciable decrease in wait time at the on-ramp as $\mu$ decreases further, corresponding to a utilisation rate of $\frac{15.5}{2 \times 8.75} = 88.7\%$. Since we still need to limit the flow of vehicles, a reasonable upper bound looks close to $\mu = 9.0$, so we have a range between $[86.2\%, 88.7\%]$ utilisation that seems to moderate waiting times effectively.
 
-SPILLBACK STUFFF!!!!
+```{r "Utilisation rate calculations"}
+lower <- smu7 / (c * 9.00)
+upper <- smu7 / (c * 8.75)
+c(lower, upper)
+```
+
+```{r "Summary statistics"}
+summary(plotlist$"9") # 86.2% utilisation
+summary(plotlist$"8.75") #88.7% utilisation
+```
+
+Now, drivers will have a maximum wait-time of $6.3$ and $8.5$ minutes respectively for each boundary, with more than 75% having an overall wait-time that is less than $1$ minute.
+
+We can consider how all boxplots were heavily skewed to the right, demonstrating that a majority of commuters will not have a journey impacted by large wait-times regardless of $\mu$. So, while the median wait-time is decreasing, it is at a far slower rate than the extreme change we see in the outliers.
+
+```{r "Outlier Exploration"}
+par(mfrow = c(1, 2))
+plot(plotlist$"8.5", xlab="Timestep", ylab="Wait Time (min)", main="Wait Times, Mu = 8.5", cex=0.6)
+plot(plotlist$"9", xlab="Timestep", ylab="Wait Time (min)", main="Wait Times, Mu = 9.0", cex=0.6)
+```
+
+The majority of timesteps have a reasonable wait-time, below about 4-minutes. However, nearing the 2000th timestep there is an extreme anomaly with wait times pushing above 10-minutes. This scenario reflects the huge uncertainties in modelling traffic flow – even though we are below capacity, it's still possible for the system to reach breakdown, although it eventually *will* recover.
+
+We can therefore split the sensitivity of a stable system into two directions:
+
+-   The $50th$ and $75th$ percentiles (wait-times for the majority of drivers) seem insensitive to changes in $\mu$;
+
+-   The outlier wait-times remain highly sensitive to changes in $\mu$
+
+Once below about $90\%$ utilisation, there is only a minimal improvement to wait-times for the $50th$ and $75th$ percentiles even for a large change in the release rate. This means that it is critical to find a $\mu$ that balances both a consistent and timed release of vehicles without breaking down under the sort of stresses we can see near the 2000th-timestep. A system that would function best here is one that can dynamically adjust its $\mu$ based on its own live wait-time distribution.
 
 ### Part 2 - Transient Response
 
@@ -584,13 +625,13 @@ Consider the maximum, worst-case model (i.e. at 7am):
 
 ```{r}
 # testing 90% utilisation
-sim90 <- onRampSimulation(1000, smu7, ssize7, rmu7 / 0.9, 2)
-hist(sim90$wtimesavg, main = "7am, p=90%", xlab="Waiting Time (minutes)", breaks = 5)
+sim90 <- onRampSimulation(2000, smu7, ssize7, rmu7 / 0.9, 2)
+hist(sim90$wtimesavg, main = "7am, p=90%", xlab="Waiting Time (minutes)", breaks = 20)
 abline(v = 2, lwd = 3, col="red")
 
 # testing 95% utilisation
-sim95 <- onRampSimulation(1000, smu7, ssize7, rmu7 / 0.95, 2)
-hist(sim95$wtimesavg, main = "7am, p=95%", xlab="Waiting Time (minutes)", breaks = 10)
+sim95 <- onRampSimulation(2000, smu7, ssize7, rmu7 / 0.95, 2)
+hist(sim95$wtimesavg, main = "7am, p=95%", xlab="Waiting Time (minutes)", breaks = 20)
 abline(v = 2, lwd = 3, col="red")
 ```
 
@@ -720,6 +761,8 @@ for (i in seq_along(rmus)) {
 limitation - spillback does not influence arrival rates (drivers may choose other paths)
 
 limitation - assuming travel time improvement from main roads is uniformly distributed (probably more time saved when you are further away than closer)
+
+limitation - resolution of simulation is 1+ minute
 
 ## Contributions
 

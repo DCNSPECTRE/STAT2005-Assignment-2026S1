@@ -234,8 +234,8 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.3032 160.5631
-Poisson Sim   113.3474 113.3474</code></pre>
+NBinom Sim    113.2362 164.6397
+Poisson Sim   113.0549 113.0549</code></pre>
 </div>
 </div>
 <p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results. One possible solution (<em>Method 1</em>) is to simply divide the volume data by 15mins and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
@@ -345,7 +345,7 @@ Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
 <p>We can also source an 8.5m effective length for one passenger car in a queue from Main Roads, accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
 <section id="part-1---sensitivity-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="part-1---sensitivity-analysis">Part 1 - Sensitivity Analysis</h3>
-<p>For each model we have developed, consider the critical point where the utilisation parameter <span class="math inline">\(\rho\)</span> is exactly one. Rearranging in terms of the release rate, we find <span class="math inline">\(\mu = \frac{1 \times c}{\lambda}\)</span> whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set <span class="math inline">\(c=2\)</span> and form an G/M/2 queue.</p>
+<p>For each model we have developed, consider the critical point where the utilisation parameter <span class="math inline">\(\rho\)</span> is exactly one. Rearranging in terms of the release rate, we find <span class="math inline">\(\mu = \frac{\lambda}{1 \times c}\)</span> whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set <span class="math inline">\(c=2\)</span> and form a G/M/2 queue.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>                   Best     Worst   Average
@@ -370,7 +370,6 @@ Departure Rate 3.774242  7.762121  5.790909</code></pre>
 </div>
 </div>
 <p>While in all cases there is theoretical stability (i.e.&nbsp;the models will all return to 0), we can see that a utilisation rate of exactly <span class="math inline">\(1\)</span> is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.</p>
-<p>In order to locate a more precise release rate,</p>
 <p>Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a plot of the ratio of arrival-to-depature counts for a series of release rates <span class="math inline">\(\mu\)</span>. This ratio can be <span class="math inline">\(1\)</span> at minimum as we can only have as many vehicles departing as there were vehicles that have arrived in the first place. However, when the system is past stability this ratio is unbounded.</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -385,7 +384,7 @@ Departure Rate 3.774242  7.762121  5.790909</code></pre>
 </div>
 </div>
 <p>For <span class="math inline">\(\mu &lt; 8\)</span> there is an unbounded exponential growth in the ratio of incoming-to-outgoing vehicles as was expected. For <span class="math inline">\(\mu \geq 8\)</span>, this ratio is clamped at one (ignoring random variation). A larger ratio means there are consistently more vehicles arriving than the system can output, and so if this is above one total breakdown will occur.</p>
-<p>This suggests that the queuing model is highly sensitive to changes in its departure rate past the critical utilisation rate <span class="math inline">\(\rho \geq 1\)</span>. To investigate further, we can shift focus to the normalise queue length plot on the right. Here, notice the linear shape past the same critical point. We can define this region by the line:</p>
+<p>This suggests that the queuing model is highly sensitive to changes in its departure rate past the critical utilisation rate <span class="math inline">\(\rho \geq 1\)</span>. To investigate further, we can shift focus to the normalised queue length plot on the right. Here, notice the linear shape past the same critical point. We can define this region by the line:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>slope <span class="ot">&lt;-</span> <span class="fu">lm</span>(meanlength[rmus <span class="sc">&lt;</span> <span class="dv">8</span>] <span class="sc">~</span> rmus[rmus <span class="sc">&lt;</span> <span class="dv">8</span>], )</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(slope)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -421,10 +420,76 @@ F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
 </div>
 </div>
 </div>
-<p>As before, we need this to trend near <span class="math inline">\(1.00\)</span> for long-term values, otherwise we consistently have more cars coming than leaving</p>
-<p>We can see this mimics the exponential growth we saw earlier (it is the same parameter i think?)</p>
-<p>maybe need to do something else more ddata based instead of graphical…</p>
-<p>SPILLBACK STUFFF!!!!</p>
+<p>As before, we need this to trend near <span class="math inline">\(1.00\)</span> for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two <span class="math inline">\(\mu\)</span> values which are clearly disjoint from the rest. We can therefore say that for <span class="math inline">\(\mu &gt; 7.76\)</span>, the lines appear to converge and return back to <span class="math inline">\(1.00\)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/Below%201%20Sensitivity-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>This is a plot of average wait-times for each timestep, allowing us to achieve sub-1-minute resolution. This slighly reduces the maximum wait-times seen but greatly aides the visualisation.</p>
+</blockquote>
+<p>There is a clear exponential growth for the boxplots as <span class="math inline">\(\mu \rightarrow 8\)</span>, or in other terms <span class="math inline">\(\rho \rightarrow 1\)</span>:</p>
+<ul>
+<li><p>the median wait time for vehicles increases;</p></li>
+<li><p>it’s IQR widens; so we have more uncertainty if quoting a given mean</p></li>
+<li><p>the whiskers grow far longer; so outlier vehicles will notice a disproportionally extreme increase in wait time</p></li>
+</ul>
+<p>Choosing to ignore the outliers, a reasonable choice that fits everyday, predicable traffic would be <span class="math inline">\(\mu=8.25\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8.25"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   0.250   1.000   2.149   2.203  16.000 </code></pre>
+</div>
+</div>
+<p>Here, 75% of drivers are waiting under <span class="math inline">\(2.2\)</span> minutes with a median of <span class="math inline">\(1\)</span> minute. However, notice the maximum wait-time of <span class="math inline">\(16\)</span> minutes. This system would benefit from with live feedback, as it can maintain a smaller <span class="math inline">\(\mu\)</span> when under regular operation, but if a spike occurs this can change to prevent the queue from ballooning as is occuring here.</p>
+<p>Instead considering the outliers, takes until <span class="math inline">\(\mu = 8.75\)</span> for there to be no appreciable decrease in wait time at the on-ramp as <span class="math inline">\(\mu\)</span> decreases further, corresponding to a utilisation rate of <span class="math inline">\(\frac{15.5}{2 \times 8.75} = 88.7\%\)</span>. Since we still need to limit the flow of vehicles, a reasonable upper bound looks close to <span class="math inline">\(\mu = 9.0\)</span>, so we have a range between <span class="math inline">\([86.2\%, 88.7\%]\)</span> utilisation that seems to moderate waiting times effectively.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>lower <span class="ot">&lt;-</span> smu7 <span class="sc">/</span> (c <span class="sc">*</span> <span class="fl">9.00</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>upper <span class="ot">&lt;-</span> smu7 <span class="sc">/</span> (c <span class="sc">*</span> <span class="fl">8.75</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(lower, upper)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8624579 0.8870996</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"9"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.0000  0.1579  0.5010  0.6429  6.3043 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8.75"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.0000  0.3000  0.7544  0.9375  8.5000 </code></pre>
+</div>
+</div>
+<p>Now, drivers will have a maximum wait-time of <span class="math inline">\(6.3\)</span> and <span class="math inline">\(8.5\)</span> minutes respectively for each boundary, with more than 75% having an overall wait-time that is less than <span class="math inline">\(1\)</span> minute.</p>
+<p>We can consider how all boxplots were heavily skewed to the right, demonstrating that a majority of commuters will not have a journey impacted by large wait-times regardless of <span class="math inline">\(\mu\)</span>. So, while the median wait-time is increasing, it is at a far slower rate than the extreme growth we see in the outliers.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(plotlist<span class="sc">$</span><span class="st">"8.5"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Wait Time (min)"</span>, <span class="at">main=</span><span class="st">"Wait Times, Mu = 8.5"</span>, <span class="at">cex=</span><span class="fl">0.6</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(plotlist<span class="sc">$</span><span class="st">"9"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Wait Time (min)"</span>, <span class="at">main=</span><span class="st">"Wait Times, Mu = 9.0"</span>, <span class="at">cex=</span><span class="fl">0.6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/Outlier%20Exploration-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The majority of timesteps have a reasonable wait-time, below about 4-minutes. However, nearing the 2000th timestep there is an extreme anomaly with wait times pushing above 10-minutes. This scenario reflects the huge uncertainties in modelling traffic flow – even though we are below capacity, it’s still possible for the system to reach breakdown, although it eventually <em>will</em> recover.</p>
+<p>We can therefore split the sensitivity of a stable system into two:</p>
+<ul>
+<li><p>The <span class="math inline">\(50th\)</span> and <span class="math inline">\(75th\)</span> percentiles (wait-times for the majority of drivers) seem insensitive to changes in <span class="math inline">\(\mu\)</span>;</p></li>
+<li><p>The outlier wait-times remain highly sensitive to changes in <span class="math inline">\(\mu\)</span></p></li>
+</ul>
+<p>Once below about <span class="math inline">\(90\%\)</span> utilisation, there is only a minimal improvement to wait-times for the <span class="math inline">\(50th\)</span> and <span class="math inline">\(75th\)</span> percentiles even for a large change in the release rate <span class="math inline">\(\mu\)</span>. This means that it is critical to find a <span class="math inline">\(\mu\)</span> that balances both a consistent and timed release of vehicles without breaking down under the sort of stresses we can see near the 2000th-timestep. A system that would function best here is one that can dynamically adjust its <span class="math inline">\(\mu\)</span> based on its own current wait-time distribution.</p>
 </section>
 <section id="part-2---transient-response" class="level3">
 <h3 class="anchored" data-anchor-id="part-2---transient-response">Part 2 - Transient Response</h3>
@@ -441,25 +506,25 @@ F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
 <p>If we assume that time improvements are uniform across the freeway, we can equate a conservative saving of 2 minutes on the Southern segment. For the following models, we can estimate the net improvement/detriment to commuters by comparing the distribution of on-ramp wait-times with this value.</p>
 <p>Consider the maximum, worst-case model (i.e.&nbsp;at 7am):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 90% utilisation</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>sim90 <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="dv">1000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.9</span>, <span class="dv">2</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim90<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=90%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">5</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 90% utilisation</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>sim90 <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="dv">2000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.9</span>, <span class="dv">2</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim90<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=90%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">20</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 95% utilisation</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>sim95 <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="dv">1000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.95</span>, <span class="dv">2</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim95<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=95%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">10</span>)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 95% utilisation</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>sim95 <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="dv">2000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.95</span>, <span class="dv">2</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim95<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=95%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">20</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -481,10 +546,10 @@ H_a = p &gt; p_o
 </div>
 <p>For a utilisation rate of 90%, we yield an extremely high p-value – we cannot reject the null and so the proportion of drivers seeing an overall increase in journey time is insignificant. Alternatively, for a 95% utilisation rate we see a p-value much lower than 0.05. Here, we are 95% confident that the true proportion of drivers waiting more than 2-minutes is at least 15.7%, a significant result.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim95<span class="sc">$</span>wtimesavg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim95<span class="sc">$</span>wtimesavg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.2374  0.9091  1.1580  1.7374  6.2353 </code></pre>
+ 0.0000  0.5294  1.6077  4.6355  9.2975 20.3000 </code></pre>
 </div>
 </div>
 <p>A majority of drivers are still waiting under 1 minute</p>
@@ -492,104 +557,104 @@ H_a = p &gt; p_o
 <section id="other-stufffffff" class="level3">
 <h3 class="anchored" data-anchor-id="other-stufffffff">other stufffffff</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PLOTTING BANK</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="at">steps=</span><span class="dv">5000</span>, <span class="at">alambda=</span>smu6, <span class="at">asize=</span>ssize6, <span class="at">rmu=</span>(rmu6 <span class="sc">-</span> <span class="dv">0</span>), <span class="at">c=</span><span class="dv">2</span>)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>incoming <span class="ot">&lt;-</span> data<span class="sc">$</span>incoming</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>outgoing <span class="ot">&lt;-</span> data<span class="sc">$</span>outgoing</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>wtimesavg <span class="ot">&lt;-</span> data<span class="sc">$</span>wtimesavg</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>wtimesall <span class="ot">&lt;-</span> data<span class="sc">$</span>wtimesall</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>wlength <span class="ot">&lt;-</span> data<span class="sc">$</span>wlength</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># queue length plot</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wlength, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Count of Vehicles"</span>, <span class="at">cex.axis =</span> <span class="fl">0.8</span>, <span class="at">col=</span><span class="st">"#b5b5b5"</span>, <span class="at">main=</span><span class="st">"Length of Queue"</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = 300, lwd=2, col="#737373")</span></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># time spent waiting plot</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wtimesavg, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Time Spent (mins)"</span>, <span class="at">cex.axis =</span> <span class="fl">0.8</span>, <span class="at">col=</span><span class="st">"#b5b5b5"</span>, <span class="at">main =</span> <span class="st">"Timing of Queue"</span>)</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = 300, lwd=2, col="#737373")</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">cumsum</span>(wtimesavg)<span class="sc">/</span><span class="fu">seq_along</span>(wtimesavg), <span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PLOTTING BANK</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="at">steps=</span><span class="dv">5000</span>, <span class="at">alambda=</span>smu6, <span class="at">asize=</span>ssize6, <span class="at">rmu=</span>(rmu6 <span class="sc">-</span> <span class="dv">0</span>), <span class="at">c=</span><span class="dv">2</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>incoming <span class="ot">&lt;-</span> data<span class="sc">$</span>incoming</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>outgoing <span class="ot">&lt;-</span> data<span class="sc">$</span>outgoing</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>wtimesavg <span class="ot">&lt;-</span> data<span class="sc">$</span>wtimesavg</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>wtimesall <span class="ot">&lt;-</span> data<span class="sc">$</span>wtimesall</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>wlength <span class="ot">&lt;-</span> data<span class="sc">$</span>wlength</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co"># queue length plot</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wlength, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Count of Vehicles"</span>, <span class="at">cex.axis =</span> <span class="fl">0.8</span>, <span class="at">col=</span><span class="st">"#b5b5b5"</span>, <span class="at">main=</span><span class="st">"Length of Queue"</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = 300, lwd=2, col="#737373")</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co"># time spent waiting plot</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wtimesavg, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Time Spent (mins)"</span>, <span class="at">cex.axis =</span> <span class="fl">0.8</span>, <span class="at">col=</span><span class="st">"#b5b5b5"</span>, <span class="at">main =</span> <span class="st">"Timing of Queue"</span>)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = 300, lwd=2, col="#737373")</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">cumsum</span>(wtimesavg)<span class="sc">/</span><span class="fu">seq_along</span>(wtimesavg), <span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># lines(movingavg, col="blue", lwd=2)</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># hysteresis plot</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wlength, wtimesavg)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># incoming vs outgoing</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming), <span class="at">type=</span><span class="st">"l"</span>, <span class="at">col=</span><span class="st">"red"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Cumulative Count"</span>, <span class="at">main=</span><span class="st">"Arrivals and Departures"</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">cumsum</span>(outgoing), <span class="at">type=</span><span class="st">"l"</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">legend=</span><span class="fu">c</span>(<span class="st">"Arrivals"</span>, <span class="st">"Departures"</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>), <span class="at">lty=</span><span class="dv">1</span>, <span class="at">bty=</span><span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># lines(movingavg, col="blue", lwd=2)</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># hysteresis plot</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wlength, wtimesavg)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># incoming vs outgoing</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming), <span class="at">type=</span><span class="st">"l"</span>, <span class="at">col=</span><span class="st">"red"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Cumulative Count"</span>, <span class="at">main=</span><span class="st">"Arrivals and Departures"</span>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">cumsum</span>(outgoing), <span class="at">type=</span><span class="st">"l"</span>, <span class="at">col=</span><span class="st">"blue"</span>)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomright"</span>, <span class="at">legend=</span><span class="fu">c</span>(<span class="st">"Arrivals"</span>, <span class="st">"Departures"</span>), <span class="at">col=</span><span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>), <span class="at">lty=</span><span class="dv">1</span>, <span class="at">bty=</span><span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># t.test(lm(cumsum(outgoing[1:100]) ~ seq(1, 100)), lm(cumsum(outgoing[200:300]) ~ seq(200:300)), paired = TRUE)</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># another incoming vs outgoing</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(outgoing), <span class="fu">cumsum</span>(incoming), <span class="at">type=</span><span class="st">"l"</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># one more</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming) <span class="sc">/</span> <span class="fu">cumsum</span>(outgoing))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># t.test(lm(cumsum(outgoing[1:100]) ~ seq(1, 100)), lm(cumsum(outgoing[200:300]) ~ seq(200:300)), paired = TRUE)</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co"># another incoming vs outgoing</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(outgoing), <span class="fu">cumsum</span>(incoming), <span class="at">type=</span><span class="st">"l"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="co"># one more</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming) <span class="sc">/</span> <span class="fu">cumsum</span>(outgoing))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-3.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-3.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(incoming <span class="sc">/</span> outgoing)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># level of service</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(wtimesall)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(incoming <span class="sc">/</span> outgoing)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co"># level of service</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(wtimesall)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-4.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-4.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming) <span class="sc">/</span> <span class="fu">cumsum</span>(outgoing))</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># SENSITIVITY THING I DIDNT LIKE</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>steps <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>rmus <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>count <span class="ot">&lt;-</span> <span class="fu">length</span>(rmus)</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="fu">runMultiSims</span>(steps, <span class="fu">rep</span>(smu7, count), <span class="fu">rep</span>(ssize7, count), rmus, c)<span class="sc">$</span>sims</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, count))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming) <span class="sc">/</span> <span class="fu">cumsum</span>(outgoing))</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># SENSITIVITY THING I DIDNT LIKE</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>steps <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>rmus <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>count <span class="ot">&lt;-</span> <span class="fu">length</span>(rmus)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="fu">runMultiSims</span>(steps, <span class="fu">rep</span>(smu7, count), <span class="fu">rep</span>(ssize7, count), rmus, c)<span class="sc">$</span>sims</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, count))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-5.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-5.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(rmus)) {</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    sims[[i]]<span class="sc">$</span>wlength,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"Timestep"</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="st">"Count of Vehicles"</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">cex.axis =</span> <span class="fl">0.8</span>,</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"#b5b5b5"</span>,</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Mu ="</span>, <span class="fu">round</span>(rmus[i], <span class="dv">2</span>))</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(rmus)) {</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    sims[[i]]<span class="sc">$</span>wlength,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"Timestep"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="st">"Count of Vehicles"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">cex.axis =</span> <span class="fl">0.8</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"#b5b5b5"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Mu ="</span>, <span class="fu">round</span>(rmus[i], <span class="dv">2</span>))</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-6.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-6.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -606,6 +671,7 @@ H_a = p &gt; p_o
 </ul>
 <p>limitation - spillback does not influence arrival rates (drivers may choose other paths)</p>
 <p>limitation - assuming travel time improvement from main roads is uniformly distributed (probably more time saved when you are further away than closer)</p>
+<p>limitation - resolution of simulation is 1+ minute</p>
 </section>
 <section id="contributions" class="level2">
 <h2 class="anchored" data-anchor-id="contributions">Contributions</h2>
