@@ -15,3 +15,10 @@ fwy23 <- raw23[raw23$MLinkID == 183, ]
 
 write.csv(fwy25, "fwy25.csv", row.names = FALSE)
 write.csv(fwy23, "fwy23.csv", row.names = FALSE)
+
+# Leach HWY additional filtering
+lch25 <- raw25[raw25$MLinkID == 5554, ]
+lch23 <- raw23[raw23$MLinkID == 5554, ]
+
+write.csv(lch25, "lch25.csv", row.names = FALSE)
+write.csv(lch23, "lch23.csv", row.names = FALSE)

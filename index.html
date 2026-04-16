@@ -219,8 +219,8 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.1631 162.9714
-Poisson Sim   113.2386 113.2386</code></pre>
+NBinom Sim    113.1895 162.5174
+Poisson Sim   113.1970 113.1970</code></pre>
 </div>
 </div>
 <p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution (<em>Method 1</em>) is to simply divide the volume data by <span class="math inline">\(15\)</span> and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
@@ -403,7 +403,7 @@ F-statistic: 5.518e+05 on 1 and 5 DF,  p-value: 8.393e-14</code></pre>
 </div>
 </div>
 </div>
-<p>As before, we need this to trend near <span class="math inline">\(1.00\)</span> for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two <span class="math inline">\(\mu\)</span> values which are clearly disjoint from the rest. We can therefore say that for <span class="math inline">\(\mu &gt; 7.76\)</span>, the critical threshold, the lines appear to converge and return back to <span class="math inline">\(1.00\)</span>.</p>
+<p>As before, we need this to trend near <span class="math inline">\(1.00\)</span> for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest <span class="math inline">\(\mu\)</span> value which is clearly disjoint from the rest. We can therefore say that for <span class="math inline">\(\mu \geq 7.76\)</span>, the critical threshold, the lines appear to converge and return back to <span class="math inline">\(1.00\)</span>.</p>
 <p>We can also visualise the wait-times of simulated users in a series of boxplots:</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -640,18 +640,24 @@ H_a = p &gt; p_o
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <p><em>2025 Annual Report | Main Roads Western Australia</em>. (2025). Wa.gov.au; Main Roads Western Australia.</p>
-<p><a href="https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf" class="uri">https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf</a></p>
+<p><a href="https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf" class="uri">https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/</a></p>
+<p><a href="https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf" class="uri">main-roads-annual-report-2025-interactive-version.pdf</a></p>
 <p>Burmas, G. (2025, February 3). Perth drivers still not convinced by benefits of $200 million smart freeway. Abc.net.au; ABC News.</p>
-<p><a href="https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328" class="uri">https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328</a></p>
+<p><a href="https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328" class="uri">https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/</a></p>
+<p><a href="https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328" class="uri">104872328</a></p>
 <p>Righini, G. (2022).&nbsp;<em>Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory</em>.</p>
-<p><a href="https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf" class="uri">https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf</a></p>
+<p><a href="https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf" class="uri">https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20</a></p>
+<p><a href="https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf" class="uri">theory.pdf</a></p>
 <p>‌Levinson, D. (2021, February 28). Engineering LibreTexts.</p>
-<p><a href="https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com" class="uri">https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com</a></p>
-<p>Siegrist, K. (2022, Apr 24). Statistics LibreTexts. <a href="#0">https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions</a></p>
+<p><a href="https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com" class="uri">https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_</a></p>
+<p><a href="https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com" class="uri">Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com</a></p>
+<p>Siegrist, K. (2022, Apr 24). Statistics LibreTexts. <a href="#0">https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_</a></p>
+<p><a href="#0">Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions</a></p>
 <p>Dot.gov. (2000).&nbsp;<em>Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering</em>. [online] Available at:</p>
 <p><a href="https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm" class="uri">https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm</a></p>
 <p>‌<em>Traffic Control -Avoiding End of Queue Collisions on High Speed Roads</em>. (2018). Main Roads.</p>
-<p><a href="https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf" class="uri">https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf</a></p>
+<p><a href="https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf" class="uri">https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-</a></p>
+<p><a href="https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf" class="uri">roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf</a></p>
 </section>
 
 </main>

@@ -44,6 +44,11 @@ ramp23 <- read.csv("ramp23.csv")
 
 fwy25 <- read.csv("fwy25.csv")
 fwy23 <- read.csv("fwy23.csv")
+
+lch25 <- read.csv("lch25.csv")
+lch23 <- read.csv("lch23.csv")
+
+# if you want everything to use the new leach highway variables, reassign them to ramp25/ramp23 because every function uses thse ones
 ```
 
 ```{r "Date and time modifications"}
@@ -480,7 +485,7 @@ for (i in seq_along(rmus)) {
 legend("topright", legend = rmus, col = cols, lty = 1, lwd = 2, title = "Mu Values", bty = "n", cex = 0.8)
 ```
 
-As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two $\mu$ values which are clearly disjoint from the rest. We can therefore say that for $\mu > 7.76$, the critical threshold, the lines appear to converge and return back to $1.00$.
+As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest $\mu$ value which is clearly disjoint from the rest. We can therefore say that for $\mu \geq 7.76$, the critical threshold, the lines appear to converge and return back to $1.00$.
 
 We can also visualise the wait-times of simulated users in a series of boxplots:
 
@@ -519,7 +524,7 @@ There is a clear exponential growth for the boxplots as $\mu \rightarrow 8$, or 
 
 A reasonable choice that seems to fit the predictable side of every-day traffic would be $\mu=8.00$.
 
-```{r}
+```{r "Summary statistics 1"}
 summary(plotlist$"8")
 ```
 
@@ -532,7 +537,7 @@ paste("Utilisation rates")
 c(lower, upper)
 ```
 
-```{r "Summary statistics"}
+```{r "Summary statistics 2"}
 summary(plotlist$"8.5") # 91.3% utilisation
 summary(plotlist$"8") #97.0% utilisation
 ```
@@ -679,7 +684,7 @@ abline(v=18, col="blue", lty=3)
 
 The two arrival and departure lines must converge at all time for a stable system. However long it takes for this equilibrium to reoccur after our step change is a measure of recovery time. Therefore, it takes approximately 13 minutes for the on-ramp to clear the slug and 'catch-up' with its regular input. This represents a quantifiable and realistic way that the system would react to a sudden inflow of vehicles.
 
-```{r "Summary Statistics 2"}
+```{r "Summary Statistics 3"}
 summary(sim$wtimesavg)
 ```
 
@@ -728,7 +733,7 @@ abline(v=275, col="orange", lty=3)
 
 The conservative model ($\mu = 8.5$, $\rho=91.3\%$) recovers somewhat quickly, with its departure slope increasing until it meets the arrivals near $T=150$. Since the system is comfortably under capacity, if more vehicles are present it has the ability to increase its output to match. On the other hand, the everyday model ($\mu = 8.0$, $\rho=97.1\%$) converges closer $T=275$, making it $\frac{100}{225}\approx40\%$ slower. Regardless, both models still take over an 90-minutes to 'catch-up' to their regular input. This again highlights the importance of feedback; a system that would perform best here is one that can comfortably restrict traffic flow under regular conditions, but increase its release rate in reaction to longer queues.
 
-```{r "Summary statistics 3"}
+```{r "Summary statistics 4"}
 summary(sim2$wtimesavg) # 91.3% utilisation
 summary(sim1$wtimesavg) # 97.1% utiisation
 ```
@@ -830,7 +835,7 @@ For a utilisation rate of $91.3\%$, we yield an extremely high p-value – we ca
 
 So, at the higher every-day utilisation rate, the system does have a statistically significant proportion of road users whose overall journey time on the freeway has increased.
 
-```{r "Summary Statistics 3"}
+```{r "Summary Statistics 5"}
 summary(sim94$wtimesavg)
 mean(sim94$wtimesavg < 2)
 ```
@@ -851,21 +856,31 @@ Nonetheless, the study remains strong at highlighting the overall, large-scale i
 
 *2025 Annual Report \| Main Roads Western Australia*. (2025). Wa.gov.au; Main Roads Western Australia.
 
-<https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf>
+[https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/](https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf){.uri}
+
+[main-roads-annual-report-2025-interactive-version.pdf](https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf){.uri}
 
 Burmas, G. (2025, February 3). Perth drivers still not convinced by benefits of \$200 million smart freeway. Abc.net.au; ABC News.
 
-<https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328>
+[https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/](https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328){.uri}
+
+[104872328](https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328){.uri}
 
 Righini, G. (2022). *Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory*.
 
-<https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf>
+[https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20](https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf){.uri}
+
+[theory.pdf](https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf){.uri}
 
 ‌Levinson, D. (2021, February 28). Engineering LibreTexts.
 
-<https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com>
+[https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A\_](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com){.uri}
 
-Siegrist, K. (2022, Apr 24). Statistics LibreTexts. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](#0)
+[Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com){.uri}
+
+Siegrist, K. (2022, Apr 24). Statistics LibreTexts. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and\_](#0)
+
+[Stochastic_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](#0)
 
 Dot.gov. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering*. \[online\] Available at:
 
@@ -873,4 +888,6 @@ Dot.gov. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy 
 
 ‌*Traffic Control -Avoiding End of Queue Collisions on High Speed Roads*. (2018). Main Roads.
 
-<https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf>
+[https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-](https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf){.uri}
+
+[roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf](https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf){.uri}
