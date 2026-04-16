@@ -156,27 +156,12 @@ window.Quarto = {
 </table>
 <section id="introduction-and-background-10-marks" class="level2">
 <h2 class="anchored" data-anchor-id="introduction-and-background-10-marks">Introduction and Background (10 marks)</h2>
-<ul>
-<li><p>Problem context</p></li>
-<li><p>Objectives</p></li>
-<li><p>Significance</p></li>
-<li><p>Brief literature review (3-5 relevant sources)</p></li>
-</ul>
-<p>Background &lt;- reid highway is arguably one of the most important links in with the mitchell freeway (only highway-freeway interchange, all others are residential avenues, important for transit of goods + people)</p>
-<p>Perth’s freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth’s outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (Main Roads, 2025). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (ABC, 2025).</p>
-<p>In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to adjust and maximise release timing while maintaining stability of the system.</p>
-<p>A queuing system with <span class="math inline">\(c\)</span> lanes is stable (i.e.&nbsp;has a controllable load) if its utilisation rate <span class="math inline">\(\rho = \frac{\lambda}{c \times \mu}\)</span> is less than <span class="math inline">\(1\)</span>, where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mu\)</span> refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).</p>
-<p><strong>The primary aim of this study is the determine whether the reported 7-minute travel time savings on the Kwinana Freeway Northbound and Mitchell Freeway Southbound are negated by the increased on-ramp queuing times for local residents. This will be evaluated by developing a queuing simulation based on historical traffic volume data.</strong></p>
-<p><a href="https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf" class="uri">https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf</a></p>
-<p>** this is unfinished but just trying to get ideas</p>
+<p>Perth’s freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city’s outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).</p>
+<p>This study will focus on the interchange between Reid Highway and the Mitchell Freeway southbound. This is a critical link in Perth’s north-west suburbs, as it represents the only highway–freeway interchange in the area and is important in the movement of both people and goods each day. The aim of this study is to determine whether the reported improvements in mainline travel times are offset by increased queuing times for users of this interchange. This will be evaluated by developing a queuing model based on historical traffic data, allowing a comparison of the time spent waiting to enter the freeway with previously reported savings. We will additionally perform parameter optimisation to minimise timing while maintaining stability of the system. For this, it is important to understand the background of stability for a model.</p>
+<p>A queuing system with <span class="math inline">\(c\)</span> lanes is stable (i.e.&nbsp;has a controllable load) if its utilisation rate <span class="math inline">\(\rho = \frac{\lambda}{c \times \mu}\)</span> is less than <span class="math inline">\(1\)</span>, where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mu\)</span> refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).</p>
 </section>
 <section id="methodology-25-marks" class="level2">
 <h2 class="anchored" data-anchor-id="methodology-25-marks">Methodology (25 marks)</h2>
-<ul>
-<li><p>Assumptions and model formulation</p></li>
-<li><p>Description of data (if applicable)</p></li>
-<li><p>Justification of modelling choices</p></li>
-</ul>
 <p>Main Roads have a large online repository of traffic volume measurements from 2013 to the present day. Each entry is a 15-minute interval which can be accessed for any road segment using its unique MLinkID. We can filter for the on-ramp of interest using its ID 5725:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ramp23[, <span class="fu">c</span>(<span class="sc">-</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">7</span>, <span class="sc">-</span><span class="dv">8</span>, <span class="sc">-</span><span class="dv">9</span>, <span class="sc">-</span><span class="dv">10</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -193,12 +178,11 @@ window.Quarto = {
 <blockquote class="blockquote">
 <p>Here, ‘Volume’ refers to the count of vehicles, and ‘TravelTimeMinutes’ the average time to travel that particular road segment.</p>
 </blockquote>
-<p>TALK ABOUT MEMORYLESS PROPERTY AS A FALLBACK/ASSUMPTION</p>
 <p>In order to construct a queuing model, we can use this dataset to simulate the incoming volume of traffic during the morning peak. Typically, this model would be formed on the Poisson distribution because of its memoryless property and ease of implementation.</p>
 <blockquote class="blockquote">
-<p>It is important to discuss the memoryless property of the poisson process as this implies that the probability of future events is completely <strong>independent</strong> of the past as the process is unable to ‘mathematically determine’ the time that has passed since the last event. This makes it an ideal process to use as we can model extreme conditions such as traffic accidents whilst ensuring that they remain completely independent of the other events.</p>
+<p>The memoryless property of the Poisson process implies that the probability of future events is completely independent of the past. This is because the process is unable to ‘mathematically determine’ the time that has passed since the previous event.</p>
 </blockquote>
-<p>However, a Poisson distribution assumes an equal mean and variance, so it’s important that verify this assumption. To visualise, let’s filter the above for weekdays, the peak hours, and without public holidays (eg 06/03/23 : Labour Day), yielding the following:</p>
+<p>However, a Poisson distribution assumes an equal mean and variance, so it’s important that verify this assumption. To visualise, let’s filter the above dataset to account for weekdays, the peak hours, and without public holidays (eg 06/03/23 : Labour Day), plotting the volume for each 15-minute interval:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -216,11 +200,12 @@ window.Quarto = {
 6am (min) 113.2273  161.803</code></pre>
 </div>
 </div>
-<p>This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID AND ALSO ASSUMPTION OF INDEPENDENCE REMAINS)</p>
+<p>This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected.</p>
 <blockquote class="blockquote">
-<p>It is important to note that, whilst we eliminate the memoryless aspect of the Poisson Process, we still retain independence with the Negative Binomial distribution. In fact, it makes a better proposition compared to the Poisson Process, as we are able to handle overdispersion in the data set which allows for more accurate modelling of accidents, and in high congestion traffic zones which makes it ideal for this studies case.</p>
+<p>Whilst a Negative Binomial relaxes the memoryless assumption, we must still assume independence of each arrival event. In reality, this is not the case because travelling vehicles tend to congregate in groups called ‘platoons’. Because our on-ramp is preceded by a signalised intersection, we would certainly see vehicles arriving based on it’s signal timing. As a result, the final model may underestimate variability in arrival patterns and associated queue timing.</p>
+<p>However, because we are only considering the traffic volume at a single point in time (and extrapolating many timesteps from it), we can somewhat relax this assumption as well.</p>
 </blockquote>
-<p>We can calculate this size parameter <span class="math inline">\(r\)</span> as follows:</p>
+<p>We can calculate the size parameter <span class="math inline">\(r\)</span> for a Negative Binomial as follows:</p>
 <p><span class="math display">\[r = \frac{\mu^2}{\sigma^2 - \mu}\]</span></p>
 <p>To see the improvement in fit, let’s simulate a Poisson and a Negative Binomial with these parameters and compare with the original dataset.</p>
 <div class="cell">
@@ -234,11 +219,14 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.2553 163.1062
-Poisson Sim   113.1260 113.1260</code></pre>
+NBinom Sim    113.1631 162.9714
+Poisson Sim   113.2386 113.2386</code></pre>
 </div>
 </div>
-<p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results. One possible solution (<em>Method 1</em>) is to simply divide the volume data by 15mins and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
+<p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution (<em>Method 1</em>) is to simply divide the volume data by <span class="math inline">\(15\)</span> and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
+<div class="caption">
+<p>1-min Model Parameters (Method 1)</p>
+</div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>                 Mean  Variance      Size
@@ -249,6 +237,9 @@ Vehicles/min 7.548485 0.7191246 -8.343333</code></pre>
 <blockquote class="blockquote">
 <p>This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if <span class="math inline">\(X=X_1 + X_2 +...+X_n \sim NBinom(k, p)\)</span> then we can model each <span class="math inline">\(X_i\)</span> as <span class="math inline">\(NBinom(\frac{k}{n}, p)\)</span> with the same probability <span class="math inline">\(p\)</span>. Extrapolating this <span class="math inline">\((_{successes}, \space _{probability})\)</span> form to the <span class="math inline">\((_{mean}, \space _{size})\)</span> form yields the parameters <span class="math inline">\((\frac{\mu}{n}, \space \frac{r}{n})\)</span>.</p>
 </blockquote>
+<div class="caption">
+<p>1-min Model Parameter Comparison (Methods 1 and 2)</p>
+</div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>                              Mean       Size
@@ -270,25 +261,12 @@ Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
 8am (mean) 11.581818 13.37102</code></pre>
 </div>
 </div>
+<p>In terms of release rates, on-ramp metering historically operates on deterministic parameters. This means that a fixed number of vehicles are released per time-unit, assuming that vehicles do not run the stop phase. Modern-day systems implement a more dynamic rate, determined live from mainline traffic volume and speed (Dot.gov, 2000). However, these still remain inherently deterministic because given a set of conditions, there is mathematical reasoning behind the release rate, not randomness.</p>
+<p>Therefore, as our model will not account for changes in mainline flow, we will use a simple deterministic release rate.</p>
 </section>
 <section id="model-implementation-and-results-45-marks" class="level2">
 <h2 class="anchored" data-anchor-id="model-implementation-and-results-45-marks">Model Implementation and Results (45 marks)</h2>
-<p>Primary points:</p>
-<ul>
-<li><p>Implementation (code integrated with explanation)</p></li>
-<li><p>Statistical summaries and visualisations</p></li>
-<li><p>Interpretation in context</p></li>
-</ul>
-<p>Secondary points:</p>
-<ul>
-<li><p>Extend to multiple servers (M/M/c) and compare</p></li>
-<li><p>Non-Exponential Service Times (M/G/1)</p></li>
-<li><p>Compare simulation results with analytical formulas (where available)</p></li>
-<li><p>Investigate waiting time distributions</p></li>
-<li><p>Time-varying arrivals (peak vs off-peak) using piecewise arrival rates</p></li>
-<li><p>Conduct sensitivity analysis on arrival and service rates</p></li>
-</ul>
-<p>For the simulation, we can develop a series of queuing models based on the parameters described above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/M/c queue with Negative Binomial arrivals.</p>
+<p>For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/D/c queue with Negative Binomial arrivals.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>onRampSimulation <span class="ot">&lt;-</span> <span class="cf">function</span>(steps, alambda, asize, rmu, c) {</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
@@ -300,53 +278,64 @@ Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  wlength <span class="ot">&lt;-</span> <span class="fu">numeric</span>(steps) <span class="co"># track length of queue in each timestep</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  wtimesavg <span class="ot">&lt;-</span> <span class="fu">numeric</span>(steps) <span class="co"># track AVERAGE waiting times of vehicles released in a timestep</span></span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  wtimesall <span class="ot">&lt;-</span> <span class="fu">c</span>() <span class="co"># track INDIVIDUAL waiting times of vehicles released in a timestep</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>steps) {</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate arrivals</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    arate <span class="ot">&lt;-</span> <span class="fu">rnbinom</span>(<span class="dv">1</span>, <span class="at">size=</span>asize, <span class="at">mu=</span>alambda)</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    queue <span class="ot">&lt;-</span> <span class="fu">c</span>(queue, <span class="fu">rep</span>(i, arate))</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    incoming[i] <span class="ot">&lt;-</span> arate</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate departures</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    rrate <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">rpois</span>(c, <span class="at">lambda=</span>rmu))</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    released <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">length</span>(queue), rrate)</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    outgoing[i] <span class="ot">&lt;-</span> released</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># release cars and track wait times</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (released <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>      rtimes <span class="ot">&lt;-</span> i <span class="sc">-</span> queue[<span class="dv">1</span><span class="sc">:</span>released]</span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>      wtimesavg[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(rtimes)</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>      wtimesall <span class="ot">&lt;-</span> <span class="fu">c</span>(wtimesall, rtimes)</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>      queue <span class="ot">&lt;-</span> queue[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span>released)]</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>      wtimesavg[i] <span class="ot">&lt;-</span> <span class="dv">0</span> </span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    wlength[i] <span class="ot">&lt;-</span> <span class="fu">length</span>(queue)</span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">incoming =</span> incoming,</span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">outgoing =</span> outgoing,</span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">wtimesavg =</span> wtimesavg,</span>
-<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">wtimesall =</span> wtimesall,</span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">wlength =</span> wlength)</span>
-<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># need to incorporate a carry because vehicles are individisble.</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># if the release rate is fractional,</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># we can 'pass' off the next vehicle to the following timestep</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  carry <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>steps) {</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate arrivals</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    arate <span class="ot">&lt;-</span> <span class="fu">rnbinom</span>(<span class="dv">1</span>, <span class="at">size=</span>asize, <span class="at">mu=</span>alambda)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    queue <span class="ot">&lt;-</span> <span class="fu">c</span>(queue, <span class="fu">rep</span>(i, arate))</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    incoming[i] <span class="ot">&lt;-</span> arate</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculate departures</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    fracrrate <span class="ot">&lt;-</span> rmu <span class="sc">*</span> c <span class="sc">+</span> carry</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    rrate <span class="ot">&lt;-</span> <span class="fu">floor</span>(fracrrate)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    carry <span class="ot">&lt;-</span> fracrrate <span class="sc">-</span> rrate</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    released <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">length</span>(queue), rrate)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    outgoing[i] <span class="ot">&lt;-</span> released</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># release cars and track wait times</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (released <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>      rtimes <span class="ot">&lt;-</span> i <span class="sc">-</span> queue[<span class="dv">1</span><span class="sc">:</span>released]</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>      wtimesavg[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(rtimes)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>      wtimesall <span class="ot">&lt;-</span> <span class="fu">c</span>(wtimesall, rtimes)</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>      queue <span class="ot">&lt;-</span> queue[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span>released)]</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>      wtimesavg[i] <span class="ot">&lt;-</span> <span class="dv">0</span> </span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    wlength[i] <span class="ot">&lt;-</span> <span class="fu">length</span>(queue)</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">incoming =</span> incoming,</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">outgoing =</span> outgoing,</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">wtimesavg =</span> wtimesavg,</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">wtimesall =</span> wtimesall,</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">wlength =</span> wlength)</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="part-1---sensitivity-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="part-1---sensitivity-analysis">Part 1 - Sensitivity Analysis</h3>
-<p>For each model we have developed, consider the critical point where the utilisation parameter <span class="math inline">\(\rho\)</span> is exactly one. Rearranging in terms of the release rate, we find <span class="math inline">\(\mu = \frac{\lambda}{1 \times c}\)</span> whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set <span class="math inline">\(c=2\)</span> and form a G/M/2 queue.</p>
+<p>For each model we have developed, consider the critical point where the utilisation parameter <span class="math inline">\(\rho\)</span> is exactly one. Rearranging in terms of the release rate, we find <span class="math inline">\(\mu = \frac{\lambda}{1 \times c}\)</span> whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set <span class="math inline">\(c=2\)</span> and form three G/D/2 queues with the following parameters:</p>
+<div class="caption">
+<p>Arrival and departure parameters for each model case</p>
+</div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>                   Best     Worst   Average
-Arrival Rate   7.548485 15.524242 11.581818
-Departure Rate 3.774242  7.762121  5.790909</code></pre>
+<pre><code>                      Best     Worst   Average
+Mean Arrival Rate 7.548485 15.524242 11.581818
+Departure Rate    3.774242  7.762121  5.790909</code></pre>
 </div>
 </div>
-<p>We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models:</p>
+<p>We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models for a long-term scenario (<span class="math inline">\(10000\)</span> timesteps):</p>
 <div class="caption">
 <p>Best, Worst and Average Case Simulations (at critical points)</p>
 </div>
@@ -359,11 +348,11 @@ Departure Rate 3.774242  7.762121  5.790909</code></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Maximum length: 1195"</code></pre>
+<pre><code>[1] "Maximum length: 458"</code></pre>
 </div>
 </div>
-<p>While in all cases there is theoretical stability (i.e.&nbsp;the models will all return to 0), we can see that a utilisation rate of exactly <span class="math inline">\(1\)</span> is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.</p>
-<p>Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a plot of the ratio of arrival-to-depature counts for a series of release rates <span class="math inline">\(\mu\)</span>. This ratio can be <span class="math inline">\(1\)</span> at minimum as we can only have as many vehicles departing as there were vehicles that have arrived in the first place. However, when the system is past stability this ratio is unbounded.</p>
+<p>While in all cases there is theoretical stability (i.e.&nbsp;the models will all return to 0), we can see that a utilisation rate of exactly <span class="math inline">\(1\)</span> is completely unreasonable in a real-world scenario. The 6am (leftmost) model particularly balloons to a queue of over 400 vehicles long, with the others reaching more than 200 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.</p>
+<p>Focusing on the 7am (center) scenario, we can reaffirm the visualisions through a plot of the ratio of net arrival-to-depature counts for a series of release rates <span class="math inline">\(\mu\)</span>. This ratio can be <span class="math inline">\(1\)</span> at minimum as we can only have as many vehicles departing as there were vehicles that have arrived in the first place. However, when the system is past stability this ratio is unbounded.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -376,8 +365,9 @@ Departure Rate 3.774242  7.762121  5.790909</code></pre>
 <pre><code>[1] "Recall that the incoming rate is 15.52 with a critical Mu of 7.76"</code></pre>
 </div>
 </div>
-<p>For <span class="math inline">\(\mu &lt; 8\)</span> there is an unbounded exponential growth in the ratio of incoming-to-outgoing vehicles as was expected. For <span class="math inline">\(\mu \geq 8\)</span>, this ratio is clamped at one (ignoring random variation). A larger ratio means there are consistently more vehicles arriving than the system can output, and so if this is above one total breakdown will occur.</p>
-<p>This suggests that the queuing model is highly sensitive to changes in its departure rate past the critical utilisation rate <span class="math inline">\(\rho \geq 1\)</span>. To investigate further, we can shift focus to the normalised queue length plot on the right. Here, notice the linear shape past the same critical point. We can define this region by the line:</p>
+<p>For <span class="math inline">\(\mu \geq 8\)</span>, this ratio is clamped at one as was expected. However, for <span class="math inline">\(\mu &lt; 8\)</span> there is an unbounded hyperbolic growth in the ratio of incoming-to-outgoing vehicles. A larger ratio means there are consistently more vehicles arriving than the system can output, and so if this is above one total breakdown will occur.</p>
+<p>This suggests the system is very sensitive to changes past the critical threshold while <span class="math inline">\(\rho\geq1\)</span>. A small decrease in <span class="math inline">\(\mu\)</span> has a proportionally large, non-linear increase in the ratio parameter.</p>
+<p>To investigate further, we can shift focus to the normalised queue length plot on the right. Here, notice the linear shape past the same critical point as <span class="math inline">\(\mu &lt; 8\)</span>. We can define this region by the line:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>slope <span class="ot">&lt;-</span> <span class="fu">lm</span>(meanlength[rmus <span class="sc">&lt;</span> <span class="dv">8</span>] <span class="sc">~</span> rmus[rmus <span class="sc">&lt;</span> <span class="dv">8</span>], )</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(slope)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -387,23 +377,23 @@ Call:
 lm(formula = meanlength[rmus &lt; 8] ~ rmus[rmus &lt; 8])
 
 Residuals:
-        1         2         3         4         5         6 
- 0.001790 -0.004197 -0.005304  0.012694 -0.001638 -0.003345 
+        1         2         3         4         5         6         7 
+ 0.005122  0.001635 -0.001853 -0.005340 -0.007827 -0.002340  0.010604 
 
 Coefficients:
                 Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)     7.828457   0.008609   909.3 8.78e-12 ***
-rmus[rmus &lt; 8] -1.002561   0.001789  -560.5 6.08e-11 ***
+(Intercept)     7.850644   0.007165  1095.8 1.20e-14 ***
+rmus[rmus &lt; 8] -0.997513   0.001343  -742.8 8.39e-14 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.007483 on 4 degrees of freedom
+Residual standard error: 0.006929 on 5 degrees of freedom
 Multiple R-squared:      1, Adjusted R-squared:      1 
-F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
+F-statistic: 5.518e+05 on 1 and 5 DF,  p-value: 8.393e-14</code></pre>
 </div>
 </div>
-<p>We find a slope of <span class="math inline">\(-1.002 \approx -1\)</span>, suggesting that for every unit increase in <span class="math inline">\(\mu\)</span> getting closer to the critical point, we lose a unit of length in the queue. So interestingly, while the ratio parameter seems to grow exponentially, the relationship between the resulting length of the queue for a given release rate <span class="math inline">\(\mu\)</span> is linear.</p>
-<p>Let’s now shift focus to the sensitivity of the system while <span class="math inline">\(\rho &lt; 1\)</span>.</p>
+<p>We find a slope of <span class="math inline">\(-0.999 \approx -1\)</span>, suggesting that for every unit increase in <span class="math inline">\(\mu\)</span> getting closer to the critical value <span class="math inline">\(\mu=8\)</span>, we lose a unit of length in the queue. So while the ratio parameter seems to grow exponentially, the relationship between the resulting length of the queue for a given release rate <span class="math inline">\(\mu\)</span> is linear. Therefore, while small changes in <span class="math inline">\(\mu\)</span> impacts the queue length significantly, the queue will break down in a very predictable and manageable way.</p>
+<p>Let’s now shift focus to the sensitivity of the system while in stability, or when <span class="math inline">\(\rho &lt; 1\)</span>.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -413,7 +403,8 @@ F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
 </div>
 </div>
 </div>
-<p>As before, we need this to trend near <span class="math inline">\(1.00\)</span> for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two <span class="math inline">\(\mu\)</span> values which are clearly disjoint from the rest. We can therefore say that for <span class="math inline">\(\mu &gt; 7.76\)</span>, the lines appear to converge and return back to <span class="math inline">\(1.00\)</span>.</p>
+<p>As before, we need this to trend near <span class="math inline">\(1.00\)</span> for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two <span class="math inline">\(\mu\)</span> values which are clearly disjoint from the rest. We can therefore say that for <span class="math inline">\(\mu &gt; 7.76\)</span>, the critical threshold, the lines appear to converge and return back to <span class="math inline">\(1.00\)</span>.</p>
+<p>We can also visualise the wait-times of simulated users in a series of boxplots:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -432,91 +423,66 @@ F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
 <li><p>it’s IQR widens; so we have more uncertainty if quoting a given mean</p></li>
 <li><p>the whiskers grow far longer; so outlier vehicles will notice a disproportionally extreme increase in wait time</p></li>
 </ul>
-<p>Choosing to ignore the outliers, a reasonable choice that fits everyday, predicable traffic would be <span class="math inline">\(\mu=8.25\)</span>.</p>
+<p>A reasonable choice that seems to fit the predictable side of every-day traffic would be <span class="math inline">\(\mu=8.00\)</span>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8.25"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  0.000   0.250   1.000   2.149   2.203  16.000 </code></pre>
+ 0.0000  0.3125  1.0000  1.5904  2.2500  9.0000 </code></pre>
 </div>
 </div>
-<p>Here, 75% of drivers are waiting under <span class="math inline">\(2.2\)</span> minutes with a median of <span class="math inline">\(1\)</span> minute. However, notice the maximum wait-time of <span class="math inline">\(16\)</span> minutes. This system would benefit from live feedback, as it can maintain a smaller <span class="math inline">\(\mu\)</span> when under regular operation, but if such a spike occurs it can adjust to prevent the queue from ballooning as is occuring here.</p>
-<p>Instead considering the outliers, it takes until <span class="math inline">\(\mu = 8.75\)</span> for there to be no appreciable decrease in wait time at the on-ramp as <span class="math inline">\(\mu\)</span> decreases further, corresponding to a utilisation of <span class="math inline">\(\frac{15.5}{2 \times 8.75} = 88.7\%\)</span>. Since we still need to maintain a consistent output, a reasonable upper bound looks close to <span class="math inline">\(\mu = 9.0\)</span>. This means that a range between <span class="math inline">\([86.2\%, 88.7\%]\)</span> utilisation seems to moderate waiting times effectively even in times of high strain.</p>
+<p>Here, 75% of drivers are waiting under <span class="math inline">\(2.25\)</span> minutes with an overall median of <span class="math inline">\(1\)</span> minute. However, notice the maximum wait-time of <span class="math inline">\(9\)</span> minutes. A wait of this length is considered completely unreasonable, so if we instead account for these outlier vehicles (or for more ‘extreme’ conditions), it takes until <span class="math inline">\(\mu = 8.5\)</span> before the maximum wait drops past <span class="math inline">\(5\)</span> minutes.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>lower <span class="ot">&lt;-</span> smu7 <span class="sc">/</span> (c <span class="sc">*</span> <span class="fl">9.00</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>upper <span class="ot">&lt;-</span> smu7 <span class="sc">/</span> (c <span class="sc">*</span> <span class="fl">8.75</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(lower, upper)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>lower <span class="ot">&lt;-</span> smu7 <span class="sc">/</span> (c <span class="sc">*</span> <span class="fl">8.5</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>upper <span class="ot">&lt;-</span> smu7 <span class="sc">/</span> (c <span class="sc">*</span> <span class="fl">8.0</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">"Utilisation rates"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8624579 0.8870996</code></pre>
+<pre><code>[1] "Utilisation rates"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(lower, upper)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9131907 0.9702652</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"9"</span>) <span class="co"># 86.2% utilisation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.0000  0.1579  0.5010  0.6429  6.3043 </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8.75"</span>) <span class="co">#88.7% utilisation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8.5"</span>) <span class="co"># 91.3% utilisation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.0000  0.3000  0.7544  0.9375  8.5000 </code></pre>
+ 0.0000  0.0000  0.2353  0.4717  0.6471  3.7647 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(plotlist<span class="sc">$</span><span class="st">"8"</span>) <span class="co">#97.0% utilisation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.3125  1.0000  1.5904  2.2500  9.0000 </code></pre>
 </div>
 </div>
-<p>Now, drivers will have a maximum wait-time of <span class="math inline">\(6.3\)</span> and <span class="math inline">\(8.5\)</span> minutes respectively for each boundary, with more than 75% having an overall wait-time that is less than <span class="math inline">\(1\)</span> minute.</p>
-<p>We can also consider how all boxplots are heavily right-skewed, demonstrating that a majority of commuters will not have a journey impacted by large wait-times regardless of <span class="math inline">\(\mu\)</span>. So, while the median wait-time is decreasing, it is at a far slower rate than the extreme change we see in the outliers.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(plotlist<span class="sc">$</span><span class="st">"8.5"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Wait Time (min)"</span>, <span class="at">main=</span><span class="st">"Wait Times, Mu = 8.5"</span>, <span class="at">cex=</span><span class="fl">0.6</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(plotlist<span class="sc">$</span><span class="st">"9"</span>, <span class="at">xlab=</span><span class="st">"Timestep"</span>, <span class="at">ylab=</span><span class="st">"Wait Time (min)"</span>, <span class="at">main=</span><span class="st">"Wait Times, Mu = 9.0"</span>, <span class="at">cex=</span><span class="fl">0.6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/Outlier%20Exploration-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Looking deeper, a majority of of timesteps have a reasonable wait-time – below about 4-minutes. However, nearing the 2000th timestep there is an extreme anomaly with wait times pushing above 10-minutes. This scenario reflects the huge uncertainties in modelling traffic flow – even though we are below capacity, it’s still possible for the system to reach breakdown, although it eventually <em>will</em> recover.</p>
+<p>At the more conservative utilisation rate, drivers will have a maximum wait time of <span class="math inline">\(3.76\)</span> minutes. However, notice that the average wait-time is under <span class="math inline">\(30\)</span> seconds. The purpose of ramp-metering is to average out the ‘platoons’ of incoming volume so that the mainline sees a smooth and predictable flow. This scenario raises the question whether this wait would be sufficient to eliminate the intense burstiness enough not to impact the mainline flow. This is outside of the scope of this study, but is something that must be considered.</p>
+<p>Moving on, consider above how all the boxplots are heavily right-skewed, demonstrating that regardless of our maximum wait-time, a majority of commuters will not be impacted by a changing <span class="math inline">\(\mu\)</span>. So, while the median wait-time is decreasing, it is at a far slower rate than the extreme change we see in the outliers.</p>
 <p>We can therefore split the sensitivity of a stable system into two distinctions:</p>
 <ul>
-<li><p>The <span class="math inline">\(50th\)</span> and <span class="math inline">\(75th\)</span> percentiles (wait-times for the majority of drivers) seem insensitive to changes in <span class="math inline">\(\mu\)</span>;</p></li>
+<li><p>The <span class="math inline">\(50th\)</span> and <span class="math inline">\(75th\)</span> percentiles (wait-times for the majority of drivers) seem relatively insensitive to changes in <span class="math inline">\(\mu\)</span>;</p></li>
 <li><p>The outlier wait-times remain highly sensitive to changes in <span class="math inline">\(\mu\)</span></p></li>
 </ul>
-<p>Once below about <span class="math inline">\(90\%\)</span> utilisation, there is only a minimal improvement to wait-times for the <span class="math inline">\(50th\)</span> and <span class="math inline">\(75th\)</span> percentiles even for a large change in the release rate. This means that it is critical to find a <span class="math inline">\(\mu\)</span> that balances both a consistent and timed release of vehicles without breaking down under the sort of stresses we can see near the 2000th-timestep. A system that would function best here is one that can dynamically adjust its <span class="math inline">\(\mu\)</span> based on a live wait-time distribution.</p>
+<p>Once below about <span class="math inline">\(95\%\)</span> utilisation, there is only a minimal improvement to wait-times for the <span class="math inline">\(50th\)</span> and <span class="math inline">\(75th\)</span> percentiles even for a large change in the release rate. This means that it is critical to find a <span class="math inline">\(\mu\)</span> that balances both a consistent and restrictive release of vehicles without breaking down. A system that would function best here is one with live feedback - dynamically adjusting its <span class="math inline">\(\mu\)</span> based on a live wait-time distribution.</p>
 </section>
 <section id="part-2---transient-response" class="level3">
 <h3 class="anchored" data-anchor-id="part-2---transient-response">Part 2 - Transient Response</h3>
-<p>Another important regard is to understand how the queuing system responds to a sudden change in the vehicle arrival pattern. For this we need to develop a new function, identical but includes:</p>
+<p>Another important regard is to understand how the queuing system responds to a sudden change in the vehicle arrival pattern. For this we need to develop a new function, identical but including:</p>
 <ul>
 <li><p>A parameter for vehicle injection (discrete surge) at timestep P</p></li>
 <li><p>A parameter for a model shift (changing to a new arrival rate and size) at timestep Q</p></li>
 <li><p>A maximum queue length before a temporary third lane is opened</p></li>
 </ul>
-<p>For this new simulation, we will switch focus to the mean model (8am) and stress-test ontop of it’s parameters.</p>
-<div class="caption">
-<p>Vehicle injection comparison for 300 vehicles at timestep 100</p>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/Testing%20vechile%20injetion-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>For a system in stability, the above arrival and departure lines need to converge at all times. If we induce a sudden step change change, we can see how long it takes for this equilibrium to reoccur as a way of determining system stress. Comparing the everyday (<span class="math inline">\(\mu = 8.25\)</span>, <span class="math inline">\(\rho=94.1\%\)</span>), and conservative (<span class="math inline">\(\mu = 8.75\)</span>, <span class="math inline">\(\rho=88.7\%\)</span>) release rates from earlier, we can use the above plot to see how each model reacts to an injection of <span class="math inline">\(300\)</span> vehicles at <span class="math inline">\(T=100\)</span>.</p>
-<p>The conservative model quickly recovers, with its departure slope increasing until it meets the arrivals near <span class="math inline">\(T=250\)</span>. Since the system is comfortably under capacity, if more vehicles are present it has the ability to increase its output to match. On the other hand, the everyday model converges closer <span class="math inline">\(T=450\)</span>, making it <span class="math inline">\(\frac{150}{350}\approx40\%\)</span> slower.</p>
-<p>Of course, <span class="math inline">\(300\)</span> vehicles is a somewhat unrealistic number. We can simulate a particularly heavy phase from the preceding intersection by considering a new model:</p>
+<p>Let’s first consider a more common scenario. This model will demonstrate the effect of an unexpectedly heavy light-phase, and will use the parameters:</p>
 <ul>
-<li><p>Arrival rate and size corresponding to 8am</p></li>
-<li><p>Running at <span class="math inline">\(85\%\)</span> utilisation</p></li>
-<li><p>A 30-car slug at <span class="math inline">\(T=5\)</span></p></li>
+<li><p><span class="math inline">\(91.3\%\)</span> utilisation rate</p></li>
+<li><p>6am parameters</p></li>
+<li><p>20 vehicle injection at <span class="math inline">\(T=5\)</span></p></li>
 </ul>
-<p>HELLO THIS IS A WORD</p>
+<p>We can use a plot of cumulative arrival and departure counts to see how the system recovers after this slug.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">onRampTransientSimulation</span>(<span class="dv">50</span>, smu8, ssize8, rmu8<span class="sc">/</span><span class="fl">0.85</span>,</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">injection =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">onRampTransientSimulation</span>(<span class="dv">30</span>, smu6, ssize6, rmu6<span class="sc">/</span><span class="fl">0.913</span>,</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">injection =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
@@ -527,32 +493,61 @@ F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
 </div>
 </div>
 </div>
-<p>It takes about 12 minutes for the on-ramp to clear the queue and catch up with its regular input. Remember, this is simulating a heavy phase <em>ontop</em> of its typical throughput, so it’s still an extreme scenario. But, it represents a quantifiable and realistic way that the system would react to a sudden inflow of vehicles.</p>
+<p>The two arrival and departure lines must converge at all time for a stable system. However long it takes for this equilibrium to reoccur after our step change is a measure of recovery time. Therefore, it takes approximately 13 minutes for the on-ramp to clear the slug and ‘catch-up’ with its regular input. This represents a quantifiable and realistic way that the system would react to a sudden inflow of vehicles.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim<span class="sc">$</span>wtimesavg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim<span class="sc">$</span>wtimesavg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.0000  0.3690  0.7038  0.9583  2.6000 </code></pre>
+ 0.0000  0.0000  0.2500  0.6361  1.2153  2.3333 </code></pre>
 </div>
 </div>
-<p>Road users are only mildly impacted with <span class="math inline">\(75\%\)</span> of drivers waiting still only under a minute, and the maximum wait remaining under three.</p>
-<p>For the final model, consider</p>
+<p>Road users are only mildly impacted with <span class="math inline">\(75\%\)</span> of drivers waiting under 1.21-minutes, and the maximum wait remaining under three.</p>
+<p>Let’s consider a more extreme scenario, where an accident has occurred at the intersection preceding the on-ramp. We’ll assume it takes 10-minutes for the accident to clear, causing a queue of vehicles to form behind.</p>
+<p>We’ll use the parameters:</p>
+<ul>
+<li><p>Both <span class="math inline">\(91.3\%\)</span> and <span class="math inline">\(97.1\%\)</span> utilisation rates</p></li>
+<li><p>7am, extreme parameters</p></li>
+<li><p>And a 10-minute vehicle slug at <span class="math inline">\(T=50\)</span>:</p></li>
+</ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">onRampTransientSimulation</span>(<span class="dv">1000</span>, smu8, ssize8, rmu8<span class="sc">/</span><span class="fl">0.85</span>,</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">shift =</span> <span class="fu">c</span>(smu7, ssize7, <span class="dv">100</span>),</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">threshold =</span> <span class="dv">30</span>)</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sim<span class="sc">$</span>wlength)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>slug <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">rnbinom</span>(<span class="dv">10</span>, <span class="at">size=</span>ssize7, <span class="at">mu=</span>smu7)) <span class="co"># 10 minutes, 7am parameters</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>slug</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 135</code></pre>
+</div>
+</div>
+<p>Once cleared, all vehicles are assumed to enter the on-ramp simultaneously, and traffic resumes as normal (i.e.&nbsp;like before, this incident occurs on-top of regular traffic flow).</p>
+<div class="caption">
+<p>Vehicle injection comparison at timestep 50</p>
+</div>
+<div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/Testing%20vechile%20injetion-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>The conservative model (<span class="math inline">\(\mu = 8.5\)</span>, <span class="math inline">\(\rho=91.3\%\)</span>) recovers somewhat quickly, with its departure slope increasing until it meets the arrivals near <span class="math inline">\(T=150\)</span>. Since the system is comfortably under capacity, if more vehicles are present it has the ability to increase its output to match. On the other hand, the everyday model (<span class="math inline">\(\mu = 8.0\)</span>, <span class="math inline">\(\rho=97.1\%\)</span>) converges closer <span class="math inline">\(T=275\)</span>, making it <span class="math inline">\(\frac{100}{225}\approx40\%\)</span> slower. Regardless, both models still take over an 90-minutes to ‘catch-up’ to their regular input. This again highlights the importance of feedback; a system that would perform best here is one that can comfortably restrict traffic flow under regular conditions, but increase its release rate in reaction to longer queues.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim2<span class="sc">$</span>wtimesavg) <span class="co"># 91.3% utilisation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   0.000   1.000   2.168   3.588   8.000 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim1<span class="sc">$</span>wtimesavg) <span class="co"># 97.1% utiisation</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   3.000   7.281   6.284   9.641  11.438 </code></pre>
+</div>
+</div>
+<p>Like before, we can see that the wait-times of road users are still not greatly impacted. Even in a more extreme scenario, although it may take some time for the system to ‘catch-up’, road users do not actually experience this as a significant increase in their individual wait-times.</p>
 </section>
-<section id="part-3---overall-system-impact" class="level3">
-<h3 class="anchored" data-anchor-id="part-3---overall-system-impact">Part 3 - Overall System Impact</h3>
+</section>
+<section id="part-3---overall-system-impact" class="level2">
+<h2 class="anchored" data-anchor-id="part-3---overall-system-impact">Part 3 - Overall System Impact</h2>
 <p>Main Roads has a proposed 7-minute improvement in Southbound travel times following the implementation of Smart Freeways. This is calculated from Hester Avenue (Clarkson) to Vincent Street (Leederville), but there are no defined figures from Reid Highway specifically.</p>
 <p>We can estimate this through the proportion of lengths:</p>
 <ul>
@@ -566,156 +561,81 @@ F-statistic: 3.142e+05 on 1 and 4 DF,  p-value: 6.079e-11</code></pre>
 <li><p>Single lane: 330m, and</p></li>
 <li><p>Double lane: 120m</p></li>
 </ul>
-<p>We can also source an effective 8.5m length for a queued passenger car (Main Roads, 2018), accounting for both the length of the vehicle and the gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
-<p>Consider the maximum, worst-case model (i.e.&nbsp;at 7am) with both previously calculated parameters:</p>
+<p>We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
+<p>Consider two 6am models with the following parameters:</p>
 <ol type="1">
-<li><p>the conservative <span class="math inline">\(88.7\%\)</span> utilisation parameter</p></li>
-<li><p>a everyday <span class="math inline">\(94.1\%\)</span> utilisation parameter</p></li>
+<li><p><span class="math inline">\(91.3\%\)</span> and <span class="math inline">\(97.1\%\)</span> utilisation rates</p></li>
+<li><p>Arrivals and departures corresponding to 8am</p></li>
+<li><p>Opening a temporary, third lane when reaching 70% spillback of the network</p></li>
 </ol>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 88% utilisation</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>sim88 <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="dv">2000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.887</span>, <span class="dv">2</span>)</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim88<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=88.7%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">20</span>)</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 94% utilisation</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>sim94 <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="dv">2000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.941</span>, <span class="dv">2</span>)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim94<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=94.1%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">20</span>)</span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> <span class="dv">67</span> <span class="sc">*</span> <span class="fl">0.7</span> <span class="co"># open temp lane at 70% capacity</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 91.3% utilisation</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>sim88 <span class="ot">&lt;-</span> <span class="fu">onRampTransientSimulation</span>(<span class="dv">1000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.913</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">threshold =</span> threshold)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim88<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=91.3%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">20</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="co"># testing 97.1% utilisation</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>sim94 <span class="ot">&lt;-</span> <span class="fu">onRampTransientSimulation</span>(<span class="dv">1000</span>, smu7, ssize7, rmu7 <span class="sc">/</span> <span class="fl">0.971</span>,</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">threshold =</span> threshold)</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sim94<span class="sc">$</span>wtimesavg, <span class="at">main =</span> <span class="st">"7am, p=97.1%"</span>, <span class="at">xlab=</span><span class="st">"Waiting Time (minutes)"</span>, <span class="at">breaks =</span> <span class="dv">20</span>)</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col=</span><span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/Overall%20system%20impact-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirming spillback has not occured (&lt;67)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(sim88<span class="sc">$</span>wlength)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 45</code></pre>
 </div>
-<p>The distribution of wait times for both utilisation rates appears exponential. As we near the critical-point (as <span class="math inline">\(\rho \rightarrow 1\)</span>), the right tail grows fatter and a greater proportion of patrons are waiting more than 2-minutes at the on-ramp. To quantitatively define this, consider a test for the proportion of vehicles with a 2-minute or longer wait at the on-ramp, whose net-travel time across the Southbound Freeway has increased:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(sim94<span class="sc">$</span>wlength)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 65</code></pre>
+</div>
+</div>
+<p>The distribution of wait times for both utilisation rates appears somewhat exponential. For <span class="math inline">\(\rho =97.1\%\)</span> however, we see a stronger uniformity on the tail end. This means that a greater proportion of users are waiting longer at the on-ramp. To quantitatively define this, consider a test for the proportion of vehicles with a 2-minute-or-longer wait at the on-ramp, whose net-travel time across the Southbound Freeway has increased:</p>
 <p><span class="math display">\[
 H_0 = p \leq p_o\
 \]</span></p>
 <p><span class="math display">\[
 H_a = p &gt; p_o
 \]</span></p>
-<p>For a threshold of 20% (i.e.&nbsp;<span class="math inline">\(p_o=0.2\)</span>) and at 95% confidence, see:</p>
+<p>For a threshold of 10% of drivers with a net increase, (i.e.&nbsp;<span class="math inline">\(p_o=0.1\)</span>) and at 95% confidence, see:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>                   P_Value Proportion
-88.7% Utilisation        1      0.164
-94.1% Utilisation &lt;2.2e-16     0.3715</code></pre>
+<pre><code>                    P_Value Proportion
+91.3% Utilisation      1.00      0.034
+97.1% Utilisation 6.763e-10      0.158</code></pre>
 </div>
 </div>
-<p>For a utilisation rate of <span class="math inline">\(88.7\%\)</span>, we yield an extremely high p-value – we cannot reject the null and so the proportion of drivers seeing an overall increase in journey time is insignificant. Alternatively, for a <span class="math inline">\(94.1\%\)</span> utilisation rate we see a p-value much lower than <span class="math inline">\(0.05\)</span>. Here, we are <span class="math inline">\(95\%\)</span> confident that the true proportion of drivers waiting more than 2-minutes is at least <span class="math inline">\(15.1\%\)</span>, a significant result.</p>
-<p>We can be confident that a good utilisation rate would be maintained between these two proportions. Due to the inherent variation of the system, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.</p>
-</section>
-<section id="other-stufffffff" class="level3">
-<h3 class="anchored" data-anchor-id="other-stufffffff">other stufffffff</h3>
+<p>For a utilisation rate of <span class="math inline">\(91.3\%\)</span>, we yield an extremely high p-value – we cannot reject the null and so the proportion of drivers seeing an overall increase in journey time is insignificant compared to <span class="math inline">\(10\%\)</span>. Alternatively, for a <span class="math inline">\(97.1\%\)</span> utilisation rate we see a p-value much lower than 0.05. Here, we are <span class="math inline">\(95\%\)</span> confident that the true proportion of drivers waiting more than 2-minutes is at least <span class="math inline">\(13.9\%\)</span>, a significant result.</p>
+<p>So, at the higher every-day utilisation rate, the system does have a statistically significant proportion of road users whose overall journey time on the freeway has increased.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PLOTTING BANK</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">onRampSimulation</span>(<span class="at">steps=</span><span class="dv">5000</span>, <span class="at">alambda=</span>smu6, <span class="at">asize=</span>ssize6, <span class="at">rmu=</span>(rmu6 <span class="sc">-</span> <span class="dv">0</span>), <span class="at">c=</span><span class="dv">2</span>)</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>incoming <span class="ot">&lt;-</span> data<span class="sc">$</span>incoming</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>outgoing <span class="ot">&lt;-</span> data<span class="sc">$</span>outgoing</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>wtimesavg <span class="ot">&lt;-</span> data<span class="sc">$</span>wtimesavg</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>wtimesall <span class="ot">&lt;-</span> data<span class="sc">$</span>wtimesall</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>wlength <span class="ot">&lt;-</span> data<span class="sc">$</span>wlength</span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># hysteresis plot</span></span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wlength, wtimesavg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sim94<span class="sc">$</span>wtimesavg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   0.375   1.000   1.107   1.812   3.000 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(sim94<span class="sc">$</span>wtimesavg <span class="sc">&lt;</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.784</code></pre>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># one more</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming) <span class="sc">/</span> <span class="fu">cumsum</span>(outgoing))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(incoming <span class="sc">/</span> outgoing)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># level of service</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(wtimesall)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-4.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">cumsum</span>(incoming) <span class="sc">/</span> <span class="fu">cumsum</span>(outgoing))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-5.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SENSITIVITY THING I DIDNT LIKE</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>steps <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>rmus <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>)</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>count <span class="ot">&lt;-</span> <span class="fu">length</span>(rmus)</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>c <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="fu">runMultiSims</span>(steps, <span class="fu">rep</span>(smu7, count), <span class="fu">rep</span>(ssize7, count), rmus, c)<span class="sc">$</span>sims</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, count))</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(rmus)) {</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    sims[[i]]<span class="sc">$</span>wlength,</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">xlab =</span> <span class="st">"Timestep"</span>,</span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="st">"Count of Vehicles"</span>,</span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">cex.axis =</span> <span class="fl">0.8</span>,</span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"#b5b5b5"</span>,</span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Mu ="</span>, <span class="fu">round</span>(rmus[i], <span class="dv">2</span>))</span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-6.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
+<p>However, because we incorporate feedback the new maximum wait time is <span class="math inline">\(3\)</span> minutes, down from <span class="math inline">\(9\)</span>. In this situation, <span class="math inline">\(78.4\%\)</span> (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.</p>
 </section>
 <section id="conclusion-15-marks" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion-15-marks">Conclusion (15 marks)</h2>
-<ul>
-<li><p>Discussion of results</p></li>
-<li><p>Strengths and limitations</p></li>
-<li><p>Possible extensions (future work)</p></li>
-<li><p>Practical implications</p></li>
-</ul>
-<p>limitation - spillback does not influence arrival rates (drivers may choose other paths)</p>
-<p>limitation - assuming travel time improvement from main roads is uniformly distributed (probably more time saved when you are further away than closer)</p>
-<p>limitation - resolution of simulation is 1+ minute</p>
-<p>limitation - does not consider the impact of more/less traffic entering the freeway by chagning the release rate</p>
-</section>
-<section id="contributions" class="level2">
-<h2 class="anchored" data-anchor-id="contributions">Contributions</h2>
-</section>
-<section id="appendix" class="level2">
-<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
-<ul>
-<li><p>Additional plots</p></li>
-<li><p>Extended code</p></li>
-<li><p>Supplementary results</p></li>
-</ul>
+<p>Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that <span class="math inline">\(75\%\)</span> of drivers will either not be affected at all, or will see an net improvement in their travel times. What does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journey times on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable in the event of a surge. An appropriate utilisation range appears to be in the range <span class="math inline">\((91.3\%, 97.1\%)\)</span>, with values on the higher end achievable with a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.</p>
+<p>The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out ‘platoons’ of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system’s response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single ‘platoon’. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection.</p>
+<p>The simulation also only measures a single point in time, extrapolated as many timesteps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.</p>
+<p>Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates feedback.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
@@ -728,6 +648,8 @@ H_a = p &gt; p_o
 <p>‌Levinson, D. (2021, February 28). Engineering LibreTexts.</p>
 <p><a href="https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com" class="uri">https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com</a></p>
 <p>Siegrist, K. (2022, Apr 24). Statistics LibreTexts. <a href="#0">https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions</a></p>
+<p>Dot.gov. (2000).&nbsp;<em>Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering</em>. [online] Available at:</p>
+<p><a href="https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm" class="uri">https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm</a></p>
 <p>‌<em>Traffic Control -Avoiding End of Queue Collisions on High Speed Roads</em>. (2018). Main Roads.</p>
 <p><a href="https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf" class="uri">https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf</a></p>
 </section>

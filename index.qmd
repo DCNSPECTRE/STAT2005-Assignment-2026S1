@@ -16,27 +16,11 @@ editor: visual
 
 ## Introduction and Background (10 marks)
 
--   Problem context
+Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).
 
--   Objectives
+This study will focus on the interchange between Reid Highway and the Mitchell Freeway southbound. This is a critical link in Perth's north-west suburbs, as it represents the only highway–freeway interchange in the area and is important in the movement of both people and goods each day. The aim of this study is to determine whether the reported improvements in mainline travel times are offset by increased queuing times for users of this interchange. This will be evaluated by developing a queuing model based on historical traffic data, allowing a comparison of the time spent waiting to enter the freeway with previously reported savings. We will additionally perform parameter optimisation to minimise timing while maintaining stability of the system. For this, it is important to understand the background of stability for a model.
 
--   Significance
-
--   Brief literature review (3-5 relevant sources)
-
-Background \<- reid highway is arguably one of the most important links in with the mitchell freeway (only highway-freeway interchange, all others are residential avenues, important for transit of goods + people)
-
-Perth's freeway network has undergone major changes in recent years. One of the more controversial upgrades has been the Smart Freeways project; a modification which aims to improve the travel time of commuters from Perth's outer suburbs heading towards the city. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, controlling the flow of traffic predominantly through digital speed-limit gantries and on-ramp metering. On the Mitchell South, this system saves 7-minutes when travelling from Hester Avenue to Vincent Street in the morning peak (Main Roads, 2025). However, residents closer to the city are generally more impacted by ramp-metering, and, have noticed their morning commute more than doubling in length (ABC, 2025).
-
-In order to weigh the validitity of these claims, this study will analyse the time spent queuing the enter the freeway and compare this with previous research of the time saved on the mainline. We will perform parameter optimisation to adjust and maximise release timing while maintaining stability of the system.
-
-A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range that is safely below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).
-
-**The primary aim of this study is the determine whether the reported 7-minute travel time savings on the Kwinana Freeway Northbound and Mitchell Freeway Southbound are negated by the increased on-ramp queuing times for local residents. This will be evaluated by developing a queuing simulation based on historical traffic volume data.**
-
-<https://pages.cs.wisc.edu/~dsmyers/cs547/simulation_handout.pdf>
-
-\*\* this is unfinished but just trying to get ideas
+A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).
 
 ```{r "Importing and filtering"}
 #| include: false
@@ -91,12 +75,6 @@ ramp23.pk.wk <- ramp23.pk.wk[date(ramp23.pk.wk$Date.Time.AWST) != "2023-03-06", 
 
 ## Methodology (25 marks)
 
--   Assumptions and model formulation
-
--   Description of data (if applicable)
-
--   Justification of modelling choices
-
 Main Roads have a large online repository of traffic volume measurements from 2013 to the present day. Each entry is a 15-minute interval which can be accessed for any road segment using its unique MLinkID. We can filter for the on-ramp of interest using its ID 5725:
 
 ```{r "Filtered datset"}
@@ -105,13 +83,11 @@ head(ramp23[, c(-6, -7, -8, -9, -10)])
 
 > Here, 'Volume' refers to the count of vehicles, and 'TravelTimeMinutes' the average time to travel that particular road segment.
 
-TALK ABOUT MEMORYLESS PROPERTY AS A FALLBACK/ASSUMPTION
-
 In order to construct a queuing model, we can use this dataset to simulate the incoming volume of traffic during the morning peak. Typically, this model would be formed on the Poisson distribution because of its memoryless property and ease of implementation.
 
-> It is important to discuss the memoryless property of the poisson process as this implies that the probability of future events is completely **independent** of the past as the process is unable to 'mathematically determine' the time that has passed since the last event. This makes it an ideal process to use as we can model extreme conditions such as traffic accidents whilst ensuring that they remain completely independent of the other events.
+> The memoryless property of the Poisson process implies that the probability of future events is completely independent of the past. This is because the process is unable to 'mathematically determine' the time that has passed since the previous event.
 
-However, a Poisson distribution assumes an equal mean and variance, so it's important that verify this assumption. To visualise, let's filter the above for weekdays, the peak hours, and without public holidays (eg 06/03/23 : Labour Day), yielding the following:
+However, a Poisson distribution assumes an equal mean and variance, so it's important that verify this assumption. To visualise, let's filter the above dataset to account for weekdays, the peak hours, and without public holidays (eg 06/03/23 : Labour Day), plotting the volume for each 15-minute interval:
 
 ```{r "Aggregating average daily volumes"}
 #| include: false
@@ -163,11 +139,13 @@ data.frame (
 )
 ```
 
-This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected. (NEED TO TALK ABOUT HOW MEMORYLESS IS STILL INVALID AND ALSO ASSUMPTION OF INDEPENDENCE REMAINS)
+This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected.
 
-> It is important to note that, whilst we eliminate the memoryless aspect of the Poisson Process, we still retain independence with the Negative Binomial distribution. In fact, it makes a better proposition compared to the Poisson Process, as we are able to handle overdispersion in the data set which allows for more accurate modelling of accidents, and in high congestion traffic zones which makes it ideal for this studies case.
+> Whilst a Negative Binomial relaxes the memoryless assumption, we must still assume independence of each arrival event. In reality, this is not the case because travelling vehicles tend to congregate in groups called 'platoons'. Because our on-ramp is preceded by a signalised intersection, we would certainly see vehicles arriving based on it's signal timing. As a result, the final model may underestimate variability in arrival patterns and associated queue timing.
+>
+> However, because we are only considering the traffic volume at a single point in time (and extrapolating many timesteps from it), we can somewhat relax this assumption as well.
 
-We can calculate this size parameter $r$ as follows:
+We can calculate the size parameter $r$ for a Negative Binomial as follows:
 
 $$r = \frac{\mu^2}{\sigma^2 - \mu}$$
 
@@ -188,7 +166,11 @@ data.frame (
 )
 ```
 
-The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results. One possible solution (*Method 1*) is to simply divide the volume data by 15mins and fit a new model. If we consider this case, our mean will scale by a factor of $\frac{1}{15}$, and the variance by a factor of $\frac{1}{15^2}$:
+The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution (*Method 1*) is to simply divide the volume data by $15$ and fit a new model. If we consider this case, our mean will scale by a factor of $\frac{1}{15}$, and the variance by a factor of $\frac{1}{15^2}$:
+
+::: caption
+1-min Model Parameters (Method 1)
+:::
 
 ```{r "Method 1 of reducing to Vehicles/Min"}
 #| echo: false
@@ -203,6 +185,10 @@ data.frame(
 Since this is now underdispersed, a Negative Binomial will no longer fit (hence the negative size). It remains unbiased, but erases so much of the original variance that it is completely irrelevant. An alternative solution (*Method 2*) that maintains our original variation is to use the divisible property of the Negative Binomial. We first form the model, then scale its parameters to maintain a dispersion that remains in proportion to the new, lower mean.
 
 > This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if $X=X_1 + X_2 +...+X_n \sim NBinom(k, p)$ then we can model each $X_i$ as $NBinom(\frac{k}{n}, p)$ with the same probability $p$. Extrapolating this $(_{successes}, \space _{probability})$ form to the $(_{mean}, \space _{size})$ form yields the parameters $(\frac{\mu}{n}, \space \frac{r}{n})$.
+
+::: caption
+1-min Model Parameter Comparison (Methods 1 and 2)
+:::
 
 ```{r Compare methods 1 and 2 of reducing to Vehicles/Min}
 #| echo: false
@@ -260,31 +246,13 @@ data.frame(
 )
 ```
 
+In terms of release rates, on-ramp metering historically operates on deterministic parameters. This means that a fixed number of vehicles are released per time-unit, assuming that vehicles do not run the stop phase. Modern-day systems implement a more dynamic rate, determined live from mainline traffic volume and speed (Dot.gov, 2000). However, these still remain inherently deterministic because given a set of conditions, there is mathematical reasoning behind the release rate, not randomness.
+
+Therefore, as our model will not account for changes in mainline flow, we will use a simple deterministic release rate.
+
 ## Model Implementation and Results (45 marks)
 
-Primary points:
-
--   Implementation (code integrated with explanation)
-
--   Statistical summaries and visualisations
-
--   Interpretation in context
-
-Secondary points:
-
--   Extend to multiple servers (M/M/c) and compare
-
--   Non-Exponential Service Times (M/G/1)
-
--   Compare simulation results with analytical formulas (where available)
-
--   Investigate waiting time distributions
-
--   Time-varying arrivals (peak vs off-peak) using piecewise arrival rates
-
--   Conduct sensitivity analysis on arrival and service rates
-
-For the simulation, we can develop a series of queuing models based on the parameters described above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/M/c queue with Negative Binomial arrivals.
+For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/D/c queue with Negative Binomial arrivals.
 
 ```{r "Primary Simulation"}
 onRampSimulation <- function(steps, alambda, asize, rmu, c) {
@@ -297,6 +265,11 @@ onRampSimulation <- function(steps, alambda, asize, rmu, c) {
   wlength <- numeric(steps) # track length of queue in each timestep
   wtimesavg <- numeric(steps) # track AVERAGE waiting times of vehicles released in a timestep
   wtimesall <- c() # track INDIVIDUAL waiting times of vehicles released in a timestep
+  
+  # need to incorporate a carry because vehicles are individisble.
+  # if the release rate is fractional,
+  # we can 'pass' off the next vehicle to the following timestep
+  carry <- 0
 
   for (i in 1:steps) {
     # calculate arrivals
@@ -306,9 +279,12 @@ onRampSimulation <- function(steps, alambda, asize, rmu, c) {
     incoming[i] <- arate
     
     # calculate departures
-    rrate <- sum(rpois(c, lambda=rmu))
-    released <- min(length(queue), rrate)
+    fracrrate <- rmu * c + carry
+    rrate <- floor(fracrrate)
+    carry <- fracrrate - rrate
     
+    released <- min(length(queue), rrate)
+  
     outgoing[i] <- released
     
     # release cars and track wait times
@@ -370,7 +346,11 @@ runMultiSims <- function(steps, alambdas, asizes, rmus, c){
 
 ### Part 1 - Sensitivity Analysis
 
-For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{\lambda}{1 \times c}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form a G/M/2 queue.
+For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{\lambda}{1 \times c}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form three G/D/2 queues with the following parameters:
+
+::: caption
+Arrival and departure parameters for each model case
+:::
 
 ```{r "Calculating departure rates"}
 #| echo: false
@@ -385,11 +365,11 @@ data.frame(
   Best = c(smu6, rmu6),
   Worst = c(smu7, rmu7),
   Average = c(smu8, rmu8),
-  row.names = c("Arrival Rate", "Departure Rate")
+  row.names = c("Mean Arrival Rate", "Departure Rate")
 )
 ```
 
-We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models:
+We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models for a long-term scenario ($10000$ timesteps):
 
 ::: caption
 Best, Worst and Average Case Simulations (at critical points)
@@ -424,15 +404,16 @@ paste("Maximum length:", maxqueue)
 
 ```
 
-While in all cases there is theoretical stability (i.e. the models will all return to 0), we can see that a utilisation rate of exactly $1$ is completely unreasonable in a real-world scenario. The 7am model particularly balloons to a queue of just under 1200 vehicles long, with the others reaching more than 400 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.
+While in all cases there is theoretical stability (i.e. the models will all return to 0), we can see that a utilisation rate of exactly $1$ is completely unreasonable in a real-world scenario. The 6am (leftmost) model particularly balloons to a queue of over 400 vehicles long, with the others reaching more than 200 vehicles each. In reality, a utilisation rate closer to 90% is generally maintained to balance throughput with wait times.
 
-Focusing on the worst-case scenario (7am), we can reaffirm the visualisions through a plot of the ratio of arrival-to-depature counts for a series of release rates $\mu$. This ratio can be $1$ at minimum as we can only have as many vehicles departing as there were vehicles that have arrived in the first place. However, when the system is past stability this ratio is unbounded.
+Focusing on the 7am (center) scenario, we can reaffirm the visualisions through a plot of the ratio of net arrival-to-depature counts for a series of release rates $\mu$. This ratio can be $1$ at minimum as we can only have as many vehicles departing as there were vehicles that have arrived in the first place. However, when the system is past stability this ratio is unbounded.
 
 ```{r "7am Analysis"}
 #| echo: false
 
 steps <- 1000
 rmus <- seq(2, 15)
+rmus <- c(rmus, rmu7)
 count <- length(rmus)
 c <- 2
 
@@ -450,18 +431,20 @@ abline(v=8, col="red", lwd = 2)
 paste("Recall that the incoming rate is", round(smu7, 2), "with a critical Mu of", round(rmu7, 2))
 ```
 
-For $\mu < 8$ there is an unbounded exponential growth in the ratio of incoming-to-outgoing vehicles as was expected. For $\mu \geq 8$, this ratio is clamped at one (ignoring random variation). A larger ratio means there are consistently more vehicles arriving than the system can output, and so if this is above one total breakdown will occur.
+For $\mu \geq 8$, this ratio is clamped at one as was expected. However, for $\mu < 8$ there is an unbounded hyperbolic growth in the ratio of incoming-to-outgoing vehicles. A larger ratio means there are consistently more vehicles arriving than the system can output, and so if this is above one total breakdown will occur.
 
-This suggests that the queuing model is highly sensitive to changes in its departure rate past the critical utilisation rate $\rho \geq 1$. To investigate further, we can shift focus to the normalised queue length plot on the right. Here, notice the linear shape past the same critical point. We can define this region by the line:
+This suggests the system is very sensitive to changes past the critical threshold while $\rho\geq1$. A small decrease in $\mu$ has a proportionally large, non-linear increase in the ratio parameter.
+
+To investigate further, we can shift focus to the normalised queue length plot on the right. Here, notice the linear shape past the same critical point as $\mu < 8$. We can define this region by the line:
 
 ```{r "Above 1 Sensitivity"}
 slope <- lm(meanlength[rmus < 8] ~ rmus[rmus < 8], )
 summary(slope)
 ```
 
-We find a slope of $-1.002 \approx -1$, suggesting that for every unit increase in $\mu$ getting closer to the critical point, we lose a unit of length in the queue. So interestingly, while the ratio parameter seems to grow exponentially, the relationship between the resulting length of the queue for a given release rate $\mu$ is linear.
+We find a slope of $-0.999 \approx -1$, suggesting that for every unit increase in $\mu$ getting closer to the critical value $\mu=8$, we lose a unit of length in the queue. So while the ratio parameter seems to grow exponentially, the relationship between the resulting length of the queue for a given release rate $\mu$ is linear. Therefore, while small changes in $\mu$ impacts the queue length significantly, the queue will break down in a very predictable and manageable way.
 
-Let's now shift focus to the sensitivity of the system while $\rho < 1$.
+Let's now shift focus to the sensitivity of the system while in stability, or when $\rho < 1$.
 
 ```{r "7am Analysis Continued"}
 #| echo: false
@@ -497,15 +480,17 @@ for (i in seq_along(rmus)) {
 legend("topright", legend = rmus, col = cols, lty = 1, lwd = 2, title = "Mu Values", bty = "n", cex = 0.8)
 ```
 
-As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two $\mu$ values which are clearly disjoint from the rest. We can therefore say that for $\mu > 7.76$, the lines appear to converge and return back to $1.00$.
+As before, we need this to trend near $1.00$ for long-term timesteps, otherwise there are consistently more vehicles arriving than leaving. This seems to occur for all but the smallest two $\mu$ values which are clearly disjoint from the rest. We can therefore say that for $\mu > 7.76$, the critical threshold, the lines appear to converge and return back to $1.00$.
+
+We can also visualise the wait-times of simulated users in a series of boxplots:
 
 ```{r "Below 1 Sensitivity"}
 #| echo: false
 
 # use sims from above
 
-rmus <- rmus[c(-1, -2)]
-sims <- sims[c(-1, -2)]
+rmus <- rmus[-1]
+sims <- sims[-1]
 
 plotlist <- lapply(sims, function(x) x$wtimesavg)
 names(plotlist) <- rmus
@@ -532,38 +517,29 @@ There is a clear exponential growth for the boxplots as $\mu \rightarrow 8$, or 
 
 -   the whiskers grow far longer; so outlier vehicles will notice a disproportionally extreme increase in wait time
 
-Choosing to ignore the outliers, a reasonable choice that fits everyday, predicable traffic would be $\mu=8.25$.
+A reasonable choice that seems to fit the predictable side of every-day traffic would be $\mu=8.00$.
 
 ```{r}
-summary(plotlist$"8.25")
+summary(plotlist$"8")
 ```
 
-Here, 75% of drivers are waiting under $2.2$ minutes with a median of $1$ minute. However, notice the maximum wait-time of $16$ minutes. This system would benefit from live feedback, as it can maintain a smaller $\mu$ when under regular operation, but if such a spike occurs it can adjust to prevent the queue from ballooning as is occuring here.
-
-Instead considering the outliers, it takes until $\mu = 8.75$ for there to be no appreciable decrease in wait time at the on-ramp as $\mu$ decreases further, corresponding to a utilisation of $\frac{15.5}{2 \times 8.75} = 88.7\%$. Since we still need to maintain a consistent output, a reasonable upper bound looks close to $\mu = 9.0$. This means that a range between $[86.2\%, 88.7\%]$ utilisation seems to moderate waiting times effectively even in times of high strain.
+Here, 75% of drivers are waiting under $2.25$ minutes with an overall median of $1$ minute. However, notice the maximum wait-time of $9$ minutes. A wait of this length is considered completely unreasonable, so if we instead account for these outlier vehicles (or for more 'extreme' conditions), it takes until $\mu = 8.5$ before the maximum wait drops past $5$ minutes.
 
 ```{r "Utilisation rate calculations"}
-lower <- smu7 / (c * 9.00)
-upper <- smu7 / (c * 8.75)
+lower <- smu7 / (c * 8.5)
+upper <- smu7 / (c * 8.0)
+paste("Utilisation rates")
 c(lower, upper)
 ```
 
 ```{r "Summary statistics"}
-summary(plotlist$"9") # 86.2% utilisation
-summary(plotlist$"8.75") #88.7% utilisation
+summary(plotlist$"8.5") # 91.3% utilisation
+summary(plotlist$"8") #97.0% utilisation
 ```
 
-Now, drivers will have a maximum wait-time of $6.3$ and $8.5$ minutes respectively for each boundary, with more than 75% having an overall wait-time that is less than $1$ minute.
+At the more conservative utilisation rate, drivers will have a maximum wait time of $3.76$ minutes. However, notice that the average wait-time is under $30$ seconds. The purpose of ramp-metering is to average out the 'platoons' of incoming volume so that the mainline sees a smooth and predictable flow. This scenario raises the question whether this wait would be sufficient to eliminate the intense burstiness enough not to impact the mainline flow. This is outside of the scope of this study, but is something that must be considered.
 
-We can also consider how all boxplots are heavily right-skewed, demonstrating that a majority of commuters will not have a journey impacted by large wait-times regardless of $\mu$. So, while the median wait-time is decreasing, it is at a far slower rate than the extreme change we see in the outliers.
-
-```{r "Outlier Exploration"}
-par(mfrow = c(1, 2))
-plot(plotlist$"8.5", xlab="Timestep", ylab="Wait Time (min)", main="Wait Times, Mu = 8.5", cex=0.6)
-plot(plotlist$"9", xlab="Timestep", ylab="Wait Time (min)", main="Wait Times, Mu = 9.0", cex=0.6)
-```
-
-Looking deeper, a majority of of timesteps have a reasonable wait-time – below about 4-minutes. However, nearing the 2000th timestep there is an extreme anomaly with wait times pushing above 10-minutes. This scenario reflects the huge uncertainties in modelling traffic flow – even though we are below capacity, it's still possible for the system to reach breakdown, although it eventually *will* recover.
+Moving on, consider above how all the boxplots are heavily right-skewed, demonstrating that regardless of our maximum wait-time, a majority of commuters will not be impacted by a changing $\mu$. So, while the median wait-time is decreasing, it is at a far slower rate than the extreme change we see in the outliers.
 
 We can therefore split the sensitivity of a stable system into two distinctions:
 
@@ -571,7 +547,7 @@ We can therefore split the sensitivity of a stable system into two distinctions:
 
 -   The outlier wait-times remain highly sensitive to changes in $\mu$
 
-Once below about $90\%$ utilisation, there is only a minimal improvement to wait-times for the $50th$ and $75th$ percentiles even for a large change in the release rate. This means that it is critical to find a $\mu$ that balances both a consistent and timed release of vehicles without breaking down under the sort of stresses we can see near the 2000th-timestep. A system that would function best here is one that can dynamically adjust its $\mu$ based on a live wait-time distribution.
+Once below about $95\%$ utilisation, there is only a minimal improvement to wait-times for the $50th$ and $75th$ percentiles even for a large change in the release rate. This means that it is critical to find a $\mu$ that balances both a consistent and restrictive release of vehicles without breaking down. A system that would function best here is one with live feedback - dynamically adjusting its $\mu$ based on a live wait-time distribution.
 
 ### Part 2 - Transient Response
 
@@ -610,6 +586,8 @@ onRampTransientSimulation <- function(steps, alambda, asize, rmu,
   wlength <- numeric(steps) # track length of queue in each timestep
   wtimesavg <- numeric(steps) # track AVERAGE waiting times of vehicles released in a timestep
   wtimesall <- c() # track INDIVIDUAL waiting times of vehicles released in a timestep
+  
+  carry <- 0
 
   for (i in 1:steps) {
     # control temporary lane
@@ -634,8 +612,13 @@ onRampTransientSimulation <- function(steps, alambda, asize, rmu,
     incoming[i] <- arate
 
     # calculate departures
-    rrate <- sum(rpois(c, lambda=rmu))
+    # rrate <- sum(rpois(c, lambda=rmu)) # poisson = bad
+    fracrrate <- rmu * c + carry
+    rrate <- floor(fracrrate)
+    carry <- fracrrate - rrate
+    
     released <- min(length(queue), rrate)
+    
     
     outgoing[i] <- released
     
@@ -662,46 +645,19 @@ onRampTransientSimulation <- function(steps, alambda, asize, rmu,
 }
 ```
 
-For this new simulation, we will switch focus to the mean model (8am) and stress-test ontop of it's parameters.
+Let's first consider a more common scenario. This model will demonstrate the effect of an unexpectedly heavy light-phase, and will use the parameters:
 
-::: caption
-Vehicle injection comparison for 300 vehicles at timestep 100
-:::
+-   $91.3\%$ utilisation rate
 
-```{r "Testing vechile injetion"}
-#| echo: false
+-   6am parameters
 
-sim1 <- onRampTransientSimulation(500, smu7, ssize7, 8.25,
-                          injection = c(300, 100), # 300 vehicles, timestep 100
-)
-sim2 <- onRampTransientSimulation(500, smu7, ssize7, 8.75,
-                          injection = c(300, 100), # 300 vehicles, timestep 100
-)
+-   20 vehicle injection at $T=5$
 
-plot(cumsum(sim1$incoming), type="l", lty=1, col="red", xlab="Timestep", ylab="Cumulative Count", main="Arrivals and Departures")
-lines(cumsum(sim1$outgoing), type="l", col="orange")
-lines(cumsum(sim2$outgoing), type="l", col="darkgreen")
-
-legend("bottomright", legend=c("Arrivals", "Departures (8.25)", "Departures (8.75)"), col=c("red", "orange", "darkgreen"), lty=1, bty="n")
-abline(v=250, col="darkgreen", lty=3)
-abline(v=450, col="orange", lty=3)
-```
-
-For a system in stability, the above arrival and departure lines need to converge at all times. If we induce a sudden step change change, we can see how long it takes for this equilibrium to reoccur as a way of determining system stress. Comparing the everyday ($\mu = 8.25$, $\rho=94.1\%$), and conservative ($\mu = 8.75$, $\rho=88.7\%$) release rates from earlier, we can use the above plot to see how each model reacts to an injection of $300$ vehicles at $T=100$.
-
-The conservative model quickly recovers, with its departure slope increasing until it meets the arrivals near $T=250$. Since the system is comfortably under capacity, if more vehicles are present it has the ability to increase its output to match. On the other hand, the everyday model converges closer $T=450$, making it $\frac{150}{350}\approx40\%$ slower.
-
-Of course, $300$ vehicles is a somewhat unrealistic number. We can simulate a realistic, but still particularly heavy phase from the preceding intersection by considering a new model:
-
--   Arrival rate and size corresponding to 8am
-
--   Running at $85\%$ utilisation
-
--   A 30-car slug at $T=5$
+We can use a plot of cumulative arrival and departure counts to see how the system recovers after this slug.
 
 ```{r "Light-phase slug"}
-sim <- onRampTransientSimulation(30, smu8, ssize8, rmu8/0.85,
-                          injection = c(30, 5))
+sim <- onRampTransientSimulation(30, smu6, ssize6, rmu6/0.913,
+                          injection = c(20, 5))
 ```
 
 ```{r "Plotting transient"}
@@ -712,24 +668,74 @@ plot(cumsum(sim$incoming), type="l", lty=1, col="red", xlab="Time (min)", ylab="
 lines(cumsum(sim$outgoing), type="l", col="blue")
 legend("bottomright", legend=c("Arrivals", "Departures"), col=c("red", "blue"), lty=1, bty="n")
 abline(v=5, col="red", lty=3)
-abline(v=17, col="blue", lty=3)
+abline(v=18, col="blue", lty=3)
 
 plot(sim$wlength, type="l", main="Queue Length", xlab="Time (min)", ylab="Count of Vehicles", col="#b5b5b5")
 points(sim$incoming, cex = 0.6, col="#b5b5b5")
 legend("topright", legend=c("Queue Length", "Arriving Vehicles"), col="#b5b5b5", lty=c(1, 0), pch=c(NA, 1), bty="n", cex=0.6)
 abline(v=5, col="red", lty=3)
-abline(v=17, col="blue", lty=3)
+abline(v=18, col="blue", lty=3)
 ```
 
-It takes about 12 minutes for the on-ramp to clear the queue and catch up with its regular input. Remember, this is simulating a heavy phase *ontop* of its typical throughput, so it's still an extreme scenario. But, it represents a quantifiable and realistic way that the system would react to a sudden inflow of vehicles.
+The two arrival and departure lines must converge at all time for a stable system. However long it takes for this equilibrium to reoccur after our step change is a measure of recovery time. Therefore, it takes approximately 13 minutes for the on-ramp to clear the slug and 'catch-up' with its regular input. This represents a quantifiable and realistic way that the system would react to a sudden inflow of vehicles.
 
-```{r "Summary Statistics"}
+```{r "Summary Statistics 2"}
 summary(sim$wtimesavg)
 ```
 
-Road users are only mildly impacted with $75\%$ of drivers waiting under two minutes, and the maximum wait remaining under three.
+Road users are only mildly impacted with $75\%$ of drivers waiting under 1.21-minutes, and the maximum wait remaining under three.
 
-### Part 3 - Overall System Impact
+Let's consider a more extreme scenario, where an accident has occurred at the intersection preceding the on-ramp. We'll assume it takes 10-minutes for the accident to clear, causing a queue of vehicles to form behind.
+
+We'll use the parameters:
+
+-   Both $91.3\%$ and $97.1\%$ utilisation rates
+
+-   7am, extreme parameters
+
+-   And a 10-minute vehicle slug at $T=50$:
+
+```{r "Slug Simulation"}
+set.seed(1234)
+slug <- sum(rnbinom(10, size=ssize7, mu=smu7)) # 10 minutes, 7am parameters
+slug
+```
+
+Once cleared, all vehicles are assumed to enter the on-ramp simultaneously, and traffic resumes as normal (i.e. like before, this incident occurs on-top of regular traffic flow).
+
+::: caption
+Vehicle injection comparison at timestep 50
+:::
+
+```{r "Testing vechile injetion"}
+#| echo: false
+
+sim1 <- onRampTransientSimulation(300, smu7, ssize7, 8, # 97.1% utilisation
+                          injection = c(slug, 50), # _ vehicles, timestep 50
+)
+sim2 <- onRampTransientSimulation(300, smu7, ssize7, 8.5, #91.3$ utilisation
+                          injection = c(slug, 50), # _ vehicles, timestep 50
+)
+
+plot(cumsum(sim1$incoming), type="l", lty=1, col="red", xlab="Timestep", ylab="Cumulative Count", main="Arrivals and Departures")
+lines(cumsum(sim1$outgoing), type="l", col="orange")
+lines(cumsum(sim2$outgoing), type="l", col="darkgreen")
+
+legend("bottomright", legend=c("Arrivals", "Departures (8.0)", "Departures (8.5)"), col=c("red", "orange", "darkgreen"), lty=1, bty="n")
+abline(v=150, col="darkgreen", lty=3)
+abline(v=275, col="orange", lty=3)
+```
+
+The conservative model ($\mu = 8.5$, $\rho=91.3\%$) recovers somewhat quickly, with its departure slope increasing until it meets the arrivals near $T=150$. Since the system is comfortably under capacity, if more vehicles are present it has the ability to increase its output to match. On the other hand, the everyday model ($\mu = 8.0$, $\rho=97.1\%$) converges closer $T=275$, making it $\frac{100}{225}\approx40\%$ slower. Regardless, both models still take over an 90-minutes to 'catch-up' to their regular input. This again highlights the importance of feedback; a system that would perform best here is one that can comfortably restrict traffic flow under regular conditions, but increase its release rate in reaction to longer queues.
+
+```{r "Summary statistics 3"}
+summary(sim2$wtimesavg) # 91.3% utilisation
+summary(sim1$wtimesavg) # 97.1% utiisation
+```
+
+Like before, we can see that the wait-times of road users are still not greatly impacted. Even in a more extreme scenario, although it may take some time for the system to 'catch-up', road users do not actually experience this as a significant increase in their individual wait-times.
+
+## Part 3 - Overall System Impact
 
 Main Roads has a proposed 7-minute improvement in Southbound travel times following the implementation of Smart Freeways. This is calculated from Hester Avenue (Clarkson) to Vincent Street (Leederville), but there are no defined figures from Reid Highway specifically.
 
@@ -751,48 +757,48 @@ According to Google Earth, the length of road preceding the on-ramp signal is:
 
 We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
 
-Consider the maximum, worst-case model (i.e. at 7am) with both previously calculated parameters:
+Consider two 6am models with the following parameters:
 
-1.  the conservative $88.7\%$ utilisation parameter
+1.  $91.3\%$ and $97.1\%$ utilisation rates
 
-2.  a everyday $94.1\%$ utilisation parameter
+2.  Arrivals and departures corresponding to 8am
 
-And a third condition: opening a temporary, third lane when reaching 70% capacity of the network.
+3.  Opening a temporary, third lane when reaching 70% spillback of the network
 
-```{r}
+```{r "Overall system impact"}
 threshold <- 67 * 0.7 # open temp lane at 70% capacity
 
 par(mfrow = c(1, 2))
-# testing 88% utilisation
-sim88 <- onRampTransientSimulation(10000, smu7, ssize7, rmu7 / 0.887,
+# testing 91.3% utilisation
+sim88 <- onRampTransientSimulation(1000, smu7, ssize7, rmu7 / 0.913,
                                    threshold = threshold)
-hist(sim88$wtimesavg, main = "7am, p=88.7%", xlab="Waiting Time (minutes)", breaks = 20)
+hist(sim88$wtimesavg, main = "7am, p=91.3%", xlab="Waiting Time (minutes)", breaks = 20)
 abline(v = 2, lwd = 3, col="red")
 
-# testing 94% utilisation
-sim94 <- onRampTransientSimulation(10000, smu7, ssize7, rmu7 / 0.941,
+# testing 97.1% utilisation
+sim94 <- onRampTransientSimulation(1000, smu7, ssize7, rmu7 / 0.971,
                                    threshold = threshold)
-hist(sim94$wtimesavg, main = "7am, p=94.1%", xlab="Waiting Time (minutes)", breaks = 20)
+hist(sim94$wtimesavg, main = "7am, p=97.1%", xlab="Waiting Time (minutes)", breaks = 20)
 abline(v = 2, lwd = 3, col="red")
 
-# confirming system has not 'spilled' back
+# Confirming spillback has not occured (<67)
 max(sim88$wlength)
 max(sim94$wlength)
 ```
 
-The distribution of wait times for both utilisation rates appears exponential. As we near the critical-point (as $\rho \rightarrow 100\%$), the right tail grows fatter and a greater proportion of patrons are waiting more than 2-minutes at the on-ramp. To quantitatively define this, consider a test for the proportion of vehicles with a 2-minute or longer wait at the on-ramp, whose net-travel time across the Southbound Freeway has increased:
+The distribution of wait times for both utilisation rates appears somewhat exponential. For $\rho =97.1\%$ however, we see a stronger uniformity on the tail end. This means that a greater proportion of users are waiting longer at the on-ramp. To quantitatively define this, consider a test for the proportion of vehicles with a 2-minute-or-longer wait at the on-ramp, whose net-travel time across the Southbound Freeway has increased:
 
 ```{r "7am Proportion Tests"}
 #| include: false
 
-# using 88.7% utilisation rate
+# using 91.3% utilisation rate
 prop.test(x = sum(sim88$wtimesavg > 2), 
           n = length(sim88$wtimesavg), 
           p = 0.1, 
           alternative = "greater", 
           conf.level = 0.95)
 
-# using 94.1% utilisation rate
+# using 97.1% utilisation rate
 prop.test(x = sum(sim94$wtimesavg > 2), 
           n = length(sim94$wtimesavg), 
           p = 0.1, 
@@ -814,95 +820,32 @@ For a threshold of 10% of drivers with a net increase, (i.e. $p_o=0.1$) and at 9
 #| echo: false
 
 data.frame(
-  P_Value = c("1.00", "0.9999"),
-  Proportion = c("0.0218", "0.089"),
-  row.names = c("88.7% Utilisation", "94.1% Utilisation")
+  P_Value = c("1.00", "6.763e-10"),
+  Proportion = c("0.034", "0.158"),
+  row.names = c("91.3% Utilisation", "97.1% Utilisation")
 )
 ```
 
-For both utilisation rates, we yield an extremely high p-value – we cannot reject the null and so the proportion of drivers seeing an overall increase in journey time is insignificant. For the everyday utilisation rate, we can be $95\%$ confident that the proportion of drivers with a net increase in journey time is at least $8.5\%$. This is, of course below the $10\%$ threshold.
+For a utilisation rate of $91.3\%$, we yield an extremely high p-value – we cannot reject the null and so the proportion of drivers seeing an overall increase in journey time is insignificant compared to $10\%$. Alternatively, for a $97.1\%$ utilisation rate we see a p-value much lower than 0.05. Here, we are $95\%$ confident that the true proportion of drivers waiting more than 2-minutes is at least $13.9\%$, a significant result.
 
-Therefore, as predicted we can maintain a higher utilisation rate as long as the system incorporates feedback to prevent queue breakdown. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
+So, at the higher every-day utilisation rate, the system does have a statistically significant proportion of road users whose overall journey time on the freeway has increased.
 
-```{r "Summary Statistics"}
+```{r "Summary Statistics 3"}
 summary(sim94$wtimesavg)
 mean(sim94$wtimesavg < 2)
 ```
 
-This does not invalidate drivers who have experienced unreasonable journey times on the Smart Freeways system. We have seen that this is certainly possible. However, when incorporating feedback in the simulation, we can see that the maximum wait shrinks to 4-minutes, a more fair number. Even in this situation, $87.2\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city.
+However, because we incorporate feedback the new maximum wait time is $3$ minutes, down from $9$. In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
 
 ## Conclusion (15 marks)
 
--   Discussion of results
+Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that $75\%$ of drivers will either not be affected at all, or will see an net improvement in their travel times. What does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journey times on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable in the event of a surge. An appropriate utilisation range appears to be in the range $(91.3\%, 97.1\%)$, with values on the higher end achievable with a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.
 
--   Strengths and limitations
+The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out 'platoons' of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system's response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single 'platoon'. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection.
 
--   Possible extensions (future work)
+The simulation also only measures a single point in time, extrapolated as many timesteps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.
 
--   Practical implications
-
-strength - transient simulation
-
-limitation - spillback does not influence arrival rates (drivers may choose other paths)
-
-limitation - assuming travel time improvement from main roads is uniformly distributed (probably more time saved when you are further away than closer)
-
-limitation - resolution of simulation is 1+ minute
-
-limitation - does not consider the impact of more/less traffic entering the freeway by chagning the release rate, which would imapct journey times overall for all drivers
-
-## Contributions
-
-## Appendix
-
--   Additional plots
-
--   Extended code
-
--   Supplementary results
-
-```{r}
-# PLOTTING BANK
-data <- onRampSimulation(steps=5000, alambda=smu6, asize=ssize6, rmu=(rmu6 - 0), c=2)
-incoming <- data$incoming
-outgoing <- data$outgoing
-wtimesavg <- data$wtimesavg
-wtimesall <- data$wtimesall
-wlength <- data$wlength
-
-# hysteresis plot
-plot(wlength, wtimesavg)
-
-# one more
-plot(cumsum(incoming) / cumsum(outgoing))
-plot(incoming / outgoing)
-
-# level of service
-hist(wtimesall)
-
-plot(cumsum(incoming) / cumsum(outgoing))
-
-# SENSITIVITY THING I DIDNT LIKE
-steps <- 1000
-rmus <- c(6, 7, 8)
-count <- length(rmus)
-c <- 2
-
-sims <- runMultiSims(steps, rep(smu7, count), rep(ssize7, count), rmus, c)$sims
-
-par(mfrow = c(1, count))
-for (i in seq_along(rmus)) {
-  plot(
-    sims[[i]]$wlength,
-    type = "l",
-    xlab = "Timestep",
-    ylab = "Count of Vehicles",
-    cex.axis = 0.8,
-    col = "#b5b5b5",
-    main = paste("Mu =", round(rmus[i], 2))
-  )
-}
-```
+Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates feedback.
 
 ## References
 
@@ -923,6 +866,10 @@ Righini, G. (2022). *Introduction Probability distributions Birth-and-death pro
 <https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com>
 
 Siegrist, K. (2022, Apr 24). Statistics LibreTexts. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](#0)
+
+Dot.gov. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering*. \[online\] Available at:
+
+<https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm>
 
 ‌*Traffic Control -Avoiding End of Queue Collisions on High Speed Roads*. (2018). Main Roads.
 
