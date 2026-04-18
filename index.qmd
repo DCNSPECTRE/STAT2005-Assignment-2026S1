@@ -130,6 +130,12 @@ text(x = bp[9], y = smax, labels = round(smeans$Volume[9], 2), pos = 3, xpd = TR
 
 The volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am.
 
+<!--# For the bit above -->
+
+Note that the piecewise approach is necessary to ensure the volume of vehicles is optimised for the local peak demand, not just a morning average. In *average* of the time between 6am and 8am would work fine for the average, but would fail to capture demand.
+
+<!--# END OF COMMENT -->
+
 We'll focus on the 6:00-6:15am interval for now:
 
 ```{r "Parameters for 6am model"}
@@ -145,6 +151,12 @@ data.frame (
 ```
 
 This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected.
+
+<!--# Some more clarifications to be added to the end of the chunk above-->
+
+*Note that the size parameter (r) of the Negative Binomial distribution represents the clustering phenomenon*
+
+<!--# END -->
 
 > Whilst a Negative Binomial relaxes the memoryless assumption, we must still assume independence of each arrival event. In reality, this is not the case because travelling vehicles tend to congregate in groups called 'platoons'. Because our on-ramp is preceded by a signalised intersection, we would certainly see vehicles arriving based on it's signal timing. As a result, the final model may underestimate variability in arrival patterns and associated queue timing.
 >
@@ -258,6 +270,17 @@ Therefore, as our model will not account for changes in mainline flow, we will u
 ## Model Implementation and Results (45 marks)
 
 For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/D/c queue with Negative Binomial arrivals.
+
+<!--Added a quick description of the simulation function and reworded the first bit of this section. -->
+
+To evaluate the impact of ramp-metering on queue lengths and wait times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.
+
+The most logical choice was to develop onRampSimulation, as a G/D/c queue using the following logic:
+
+1.  During initialisation, the function sets up empty vectors to track incoming and outgoing volume, queue length, and both average and individual wait times across all time steps. A **fixed random seed** is used in the function top employ the CRN *(Common Random Numbers)* variance reduction technique which will allow us to compare different departure rates $\mu$ against the exact same arrival sequence without random noise obscuring the comparison.
+2.  We employ stochastic arrivals at each timestep using the Negative Binomial Distribution based on specific $\mu$ and size parameters calculated from the relevant Main Roads data set. These vehicles are, in a nutshell, stamped, and added to the back of the queue.
+3.  Whilst it is known that the ramps function on a **deterministic** release rate, when simulating at a per-minute interval, the release rate could potentially become fractional (i.e., 8.5 vehicles per minute). As logic prevails, it is not possible to have a fractional component of a vehicle, the simulation has been designed around this potential break-point and is able to pass fractional components onto the next release by using a $\text{carry}$.
+4.  The model finally is able to release the allocated number of vehicles (or entire queue if the queue \< release rate). Because we stamped the vehicles with an arrival time, the wait time for each departing vehicle is simply calculated as $\text{Current Time-step - Arrival Time-step}$
 
 ```{r "Primary Simulation"}
 onRampSimulation <- function(steps, alambda, asize, rmu, c) {
@@ -375,6 +398,12 @@ data.frame(
 ```
 
 We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models for a long-term scenario ($10000$ timesteps):
+
+<!--# For the bit above -->
+
+Note that a large number of timesteps was not only selected to capture the time of interest, but also to ensure that the *Law of Large Numbers* appies making the estimates highly stable.
+
+<!--# END OF COMMENT -->
 
 ::: caption
 Best, Worst and Average Case Simulations (at critical points)
@@ -510,6 +539,15 @@ boxplot(plotlist,
         outline=TRUE,
         cex=0.8
         )
+abline(v=2, col='RED', lw = 2)
+abline(v=7, col="BLUE", lw = 2)
+legend("topright", 
+       legend = c("Proposed 2-Minute Savings Southbound (South of River) (Part 3)", "Proposed 7-minute savings Southbound (North of River) (Part 3)"), 
+       col = c("red","blue"),
+       lty = 1, 
+       lwd = 2,
+       cex =0.6
+       )
 ```
 
 > This is a plot of average wait-times for each timestep, allowing us to achieve sub-1-minute resolution. This slighly reduces the maximum wait-times seen but greatly aides the visualisation.
@@ -740,7 +778,7 @@ summary(sim1$wtimesavg) # 97.1% utiisation
 
 Like before, we can see that the wait-times of road users are still not greatly impacted. Even in a more extreme scenario, although it may take some time for the system to 'catch-up', road users do not actually experience this as a significant increase in their individual wait-times.
 
-## Part 3 - Overall System Impact
+### Part 3 - Overall System Impact
 
 Main Roads has a proposed 7-minute improvement in Southbound travel times following the implementation of Smart Freeways. This is calculated from Hester Avenue (Clarkson) to Vincent Street (Leederville), but there are no defined figures from Reid Highway specifically.
 
@@ -761,6 +799,12 @@ According to Google Earth, the length of road preceding the on-ramp signal is:
 -   Double lane: 120m
 
 We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
+
+<!--# Add to the little chunk above -->
+
+It is important to note that using the model with $97.1\%$ utilisation rate is in theory *fine*, however the system would suffer a total system breakdown in the event that a single slow truck or a 2 vehicle surge occurs pushing the system over the 67 vehicle queue that had been determined earlier. This entails that a system with $91.3\%$ would server better to reduce the chance for a spillback event to occur. This is due to the fact that with the higher utilisation model, there is only a 2 vehicle buffer, whereas with the $91.3\%$ model, the buffer would be $67 - 0.913\times67= 5.829 \approx 5 \text{ whole cars}$
+
+<!--# END OF COMMENT -->
 
 Consider two 6am models with the following parameters:
 
