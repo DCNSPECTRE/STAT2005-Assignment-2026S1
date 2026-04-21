@@ -128,13 +128,7 @@ abline(v = bp[9], col = "#252e1f", lwd = 3, lty = 2)
 text(x = bp[9], y = smax, labels = round(smeans$Volume[9], 2), pos = 3, xpd = TRUE)
 ```
 
-The volume of traffic entering the freeway varies heavily over the course of the morning. It would be unreasonable to fit a single model to this level of variation, so instead consider a piecewise approach. Models that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am.
-
-<!--# For the bit above -->
-
-Note that the piecewise approach is necessary to ensure the volume of vehicles is optimised for the local peak demand, not just a morning average. In *average* of the time between 6am and 8am would work fine for the average, but would fail to capture demand.
-
-<!--# END OF COMMENT -->
+The volume of traffic entering the freeway varies heavily over the course of the morning. In order to optimise for the local demand peak, consider a piecewise model. Simulations that account for the minimum, maximum and mean volume each morning will be constructed, correlating to the times 6am, 7am and approximately 8am. If instead we averaged the entire peak, we would fail to capture actual demand. This way, we can simply extrapolate a best and worst case through as many timesteps as needed (rather than trying to represent the whole morning).
 
 We'll focus on the 6:00-6:15am interval for now:
 
@@ -150,13 +144,7 @@ data.frame (
 )
 ```
 
-This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (for dispersion) can be selected.
-
-<!--# Some more clarifications to be added to the end of the chunk above-->
-
-*Note that the size parameter (r) of the Negative Binomial distribution represents the clustering phenomenon*
-
-<!--# END -->
+This is an overdispersed dataset where the variance of volume is considerably higher than its mean. This is true throughout the entire dataset, meaning a Poisson distribution would be unsuitable as we do not satisfy the assumption of equidispersion. In order to provide a better fit, we can consider a Negative Binomial where both a mean and a size parameter (which represents the clustering phenonmenon) can be selected.
 
 > Whilst a Negative Binomial relaxes the memoryless assumption, we must still assume independence of each arrival event. In reality, this is not the case because travelling vehicles tend to congregate in groups called 'platoons'. Because our on-ramp is preceded by a signalised intersection, we would certainly see vehicles arriving based on it's signal timing. As a result, the final model may underestimate variability in arrival patterns and associated queue timing.
 >
@@ -203,7 +191,9 @@ Since this is now underdispersed, a Negative Binomial will no longer fit (hence 
 
 <!--# FOR THE BIT ABOVE -->
 
-I think here we should acknowledge the implications of scaling down to 1-min intervals. Because traffic is "bursty" due to platooning, a real 1-min data set would show higher variance than the scaled parameters. With the scaling we did, we assume that the variance is homogeneous across intervals every interval of \[1,15\]
+I think here we should acknowledge the implications of scaling down to 1-min intervals. Because traffic is "bursty" due to platooning, a real 1-min data set would show higher variance than the scaled parameters. With the scaling we did, we assume that the variance is homogeneous across intervals every interval of \[1,15\]!!!
+
+definintely need to incorporate this
 
 <!--# END OF COMMENT -->
 
@@ -275,11 +265,11 @@ Therefore, as our model will not account for changes in mainline flow, we will u
 
 ## Model Implementation and Results (45 marks)
 
-For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for an G/D/c queue with Negative Binomial arrivals.
+For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for a G/D/c queue with Negative Binomial arrivals.
 
 <!--Added a quick description of the simulation function and reworded the first bit of this section. -->
 
-To evaluate the impact of ramp-metering on queue lengths and wait times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.
+To evaluate the impact of ramp-metering on queue lengths and wait-times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.
 
 The most logical choice was to develop onRampSimulation, as a G/D/c queue using the following logic:
 
@@ -293,6 +283,8 @@ The most logical choice was to develop onRampSimulation, as a G/D/c queue using 
 
     We need to state that even though we deviate from the G/D/c due to the fact that we dont have a strictly deterministic system (the carry creates deviation releasing as an example 3,4,3,4,...,4), we are trading that deterministic approach for realistic discrete vehicle modelling which is arguably more useful to model.
 
+    yes good idea!
+
     <!--#  -->
 
 4.  The model finally is able to release the allocated number of vehicles (or entire queue if the queue \< release rate). Because we stamped the vehicles with an arrival time, the wait time for each departing vehicle is simply calculated as $\text{Current Time-step - Arrival Time-step}$
@@ -300,6 +292,8 @@ The most logical choice was to develop onRampSimulation, as a G/D/c queue using 
 <!--# For the simulation QUESTION -->
 
 Just had a thought about the simulation, should we be discarding the simulation data for the first few hundred time steps to act as a "warmup" period. Without it, technically the first set of cars will have a near zero or zero wait time. Unless that is something you wanted to show...
+
+hmm this is intereesting. we could, but i think it would create a weird jump in the cumulative graphs so i don't think its worth worrying about. you can see that for most of the stable systems the queue remains around 0 anyways so it wouldnt change much
 
 <!--# END OF COMMENT -->
 
@@ -418,13 +412,7 @@ data.frame(
 )
 ```
 
-We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models for a long-term scenario ($10000$ timesteps):
-
-<!--# For the bit above -->
-
-Note that a large number of timesteps was not only selected to capture the time of interest, but also to ensure that the *Law of Large Numbers* appies making the estimates highly stable.
-
-<!--# END OF COMMENT -->
+We can start by running the above simulation for the minimum (best, 6am), maximum (worst, 7am) and mean (average, 8am) models for a long-term scenario ($10000$ timesteps). Here, the *Law of Large Numbers* applies making the estimates highly stable.
 
 ::: caption
 Best, Worst and Average Case Simulations (at critical points)
@@ -821,12 +809,6 @@ According to Google Earth, the length of road preceding the on-ramp signal is:
 
 We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
 
-<!--# Add to the little chunk above -->
-
-It is important to note that using the model with $97.1\%$ utilisation rate is in theory *fine*, however the system would suffer a total system breakdown in the event that a single slow truck or a 2 vehicle surge occurs pushing the system over the 67 vehicle queue that had been determined earlier. This entails that a system with $91.3\%$ would server better to reduce the chance for a spillback event to occur. This is due to the fact that with the higher utilisation model, there is only a 2 vehicle buffer, whereas with the $91.3\%$ model, the buffer would be $67 - 0.913\times67= 5.829 \approx 5 \text{ whole cars}$
-
-<!--# END OF COMMENT -->
-
 Consider two 6am models with the following parameters:
 
 1.  $91.3\%$ and $97.1\%$ utilisation rates
@@ -852,9 +834,14 @@ hist(sim94$wtimesavg, main = "7am, p=97.1%", xlab="Waiting Time (minutes)", brea
 abline(v = 2, lwd = 3, col="red")
 
 # Confirming spillback has not occured (<67)
-max(sim88$wlength)
-max(sim94$wlength)
+data.frame(
+  maximum = 67,
+  conservative = max(sim88$wlength),
+  everday = max(sim94$wlength)
+)
 ```
+
+> A $97.1\%$ utilisation rate is in theory *fine*, but the system would suffer a total breakdown in the event that a single slow truck or minor vehicle surge occurs, pushing the system over its capacity. This entails that a system with $91.3\%$ utilisation would serve better to reduce the chance for spillback to occur. This is due to the fact that with the higher utilisation model, there is only a 2 vehicle buffer, whereas with the $91.3\%$ model, the buffer would be $67 - 0.913\times67= 5.829 \approx 5$ vehicles.
 
 The distribution of wait times for both utilisation rates appears somewhat exponential. For $\rho =97.1\%$ however, we see a stronger uniformity on the tail end. This means that a greater proportion of users are waiting longer at the on-ramp. To quantitatively define this, consider a test for the proportion of vehicles with a 2-minute-or-longer wait at the on-ramp, whose net-travel time across the Southbound Freeway has increased:
 
@@ -905,7 +892,7 @@ summary(sim94$wtimesavg)
 mean(sim94$wtimesavg < 2)
 ```
 
-However, because we incorporate feedback the new maximum wait time is $3$ minutes, down from $9$. In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
+However, because we incorporate feedback the new maximum wait-time is $3$ minutes, down from $9$. In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
 
 ## Conclusion (15 marks)
 
