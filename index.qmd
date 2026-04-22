@@ -189,6 +189,10 @@ data.frame(
 
 Since this is now underdispersed, a Negative Binomial will no longer fit (hence the negative size). It remains unbiased, but erases so much of the original variance that it is completely irrelevant. An alternative solution (*Method 2*) that maintains our original variation is to use the divisible property of the Negative Binomial. We first form the model, then scale its parameters to maintain a dispersion that remains in proportion to the new, lower mean.
 
+> This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if $X=X_1 + X_2 +...+X_n \sim NBinom(k, p)$ then we can model each $X_i$ as $NBinom(\frac{k}{n}, p)$ with the same probability $p$. Extrapolating this $(_{successes}, \space _{probability})$ form to the $(_{mean}, \space _{size})$ form yields the parameters $(\frac{\mu}{n}, \space \frac{r}{n})$.
+
+> Although this is a valid process for the Negative Binomial, we have to make an additional assumption that the volume in each 15 minute interval is uniform. Because of the signalised intersection preceeding the on-ramp, we would inevitably see heavy platoons or 'bursts' forming each couple of minutes. Beaause our simulation erases this variability, it means that the wait-times we find are still likely to understimate reality.
+
 <!--# FOR THE BIT ABOVE -->
 
 I think here we should acknowledge the implications of scaling down to 1-min intervals. Because traffic is "bursty" due to platooning, a real 1-min data set would show higher variance than the scaled parameters. With the scaling we did, we assume that the variance is homogeneous across intervals every interval of \[1,15\]!!!
@@ -196,8 +200,6 @@ I think here we should acknowledge the implications of scaling down to 1-min int
 definintely need to incorporate this
 
 <!--# END OF COMMENT -->
-
-> This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if $X=X_1 + X_2 +...+X_n \sim NBinom(k, p)$ then we can model each $X_i$ as $NBinom(\frac{k}{n}, p)$ with the same probability $p$. Extrapolating this $(_{successes}, \space _{probability})$ form to the $(_{mean}, \space _{size})$ form yields the parameters $(\frac{\mu}{n}, \space \frac{r}{n})$.
 
 ::: caption
 1-min Model Parameter Comparison (Methods 1 and 2)
@@ -277,7 +279,7 @@ The most logical choice was to develop onRampSimulation, as a G/D/c queue using 
 
 2.  We employ stochastic arrivals at each timestep using the Negative Binomial Distribution based on specific $\mu$ and size parameters calculated from the relevant Main Roads data set. These vehicles are, in a nutshell, stamped, and added to the back of the queue.
 
-3.  Whilst it is known that the ramps function on a **deterministic** release rate, when simulating at a per-minute interval, the release rate could potentially become fractional (i.e., 8.5 vehicles per minute). As logic prevails, it is not possible to have a fractional component of a vehicle, the simulation has been designed around this potential break-point and is able to pass fractional components onto the next release by using a $\text{carry}$.
+3.  Whilst it is known that the ramps function on a **deterministic** release rate, when simulating at a per-minute interval, the release rate could potentially become fractional (i.e., 8.5 vehicles per minute). As logic prevails, it is not possible to have a fractional component of a vehicle, the simulation has been designed around this potential break-point and is able to pass fractional components onto the next release by using a $\text{carry}$. This slightly deviates from a standard G/D/c model, but this trade-off is worth forcing for a more realistic discrete vehicle model.
 
     <!--# for 3. -->
 
