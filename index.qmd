@@ -884,6 +884,8 @@ The simulation also only measures a single point in time, extrapolated as many t
 
 Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates feedback.
 
+<!--#  -->
+
 ## References
 
 *2025 Annual Report \| Main Roads Western Australia*. (2025). Wa.gov.au; Main Roads Western Australia.
