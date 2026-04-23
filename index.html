@@ -219,8 +219,8 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.1918 163.3593
-Poisson Sim   113.2361 113.2361</code></pre>
+NBinom Sim    113.0809 160.6774
+Poisson Sim   113.3595 113.3595</code></pre>
 </div>
 </div>
 <p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution (<em>Method 1</em>) is to simply divide the volume data by <span class="math inline">\(15\)</span> and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
@@ -269,7 +269,6 @@ Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
 </section>
 <section id="model-implementation-and-results-45-marks" class="level2">
 <h2 class="anchored" data-anchor-id="model-implementation-and-results-45-marks">Model Implementation and Results (45 marks)</h2>
-<p>For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for a G/D/c queue with Negative Binomial arrivals.</p>
 <!--Added a quick description of the simulation function and reworded the first bit of this section. -->
 <p>To evaluate the impact of ramp-metering on queue lengths and wait-times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.</p>
 <p>The most logical choice was to develop onRampSimulation, as a G/D/c queue using the following logic:</p>
@@ -576,7 +575,7 @@ F-statistic: 5.518e+05 on 1 and 5 DF,  p-value: 8.393e-14</code></pre>
 <li><p>Double lane: 120m</p></li>
 </ul>
 <p>We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
-<p>Consider two 6am models with the following parameters:</p>
+<p>Consider two models with the following parameters:</p>
 <ol type="1">
 <li><p><span class="math inline">\(91.3\%\)</span> and <span class="math inline">\(97.1\%\)</span> utilisation rates</p></li>
 <li><p>Arrivals and departures corresponding to 8am</p></li>
@@ -655,6 +654,7 @@ H_a = p &gt; p_o
 <p>The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out ‘platoons’ of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system’s response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single ‘platoon’. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection.</p>
 <p>The simulation also only measures a single point in time, extrapolated as many timesteps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.</p>
 <p>Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates feedback.</p>
+<!--#  -->
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

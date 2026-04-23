@@ -259,8 +259,6 @@ Therefore, as our model will not account for changes in mainline flow, we will u
 
 ## Model Implementation and Results (45 marks)
 
-For the simulation, we can develop a series of queuing models based on the parameters described further above. We have developed a reusable function which can represent different arrival and release rates, applied for a G/D/c queue with Negative Binomial arrivals.
-
 <!--Added a quick description of the simulation function and reworded the first bit of this section. -->
 
 To evaluate the impact of ramp-metering on queue lengths and wait-times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.
@@ -528,11 +526,10 @@ boxplot(plotlist,
         outline=TRUE,
         cex=0.8
         )
-abline(v=2, col='RED', lw = 2)
-abline(v=7, col="BLUE", lw = 2)
+abline(v=2, col="red", lw = 2)
 legend("topright", 
-       legend = c("Proposed 2-Minute Savings Southbound (South of River) (Part 3)", "Proposed 7-minute savings Southbound (North of River) (Part 3)"), 
-       col = c("red","blue"),
+       legend = "Proposed 2-Minute Savings (Part 3)",
+       col = "red",
        lty = 1, 
        lwd = 2,
        cex =0.6
@@ -789,7 +786,7 @@ According to Google Earth, the length of road preceding the on-ramp signal is:
 
 We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of $\frac{330+120 \times 2}{8.5}\approx67$ vehicles before spillback occurs.
 
-Consider two 6am models with the following parameters:
+Consider two models with the following parameters:
 
 1.  $91.3\%$ and $97.1\%$ utilisation rates
 
@@ -872,11 +869,11 @@ summary(sim94$wtimesavg)
 mean(sim94$wtimesavg < 2)
 ```
 
-However, because we incorporate feedback the new maximum wait-time is $3$ minutes, down from $9$. In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
+However, because we incorporate feedback, the new maximum wait-time is only $3$ minute (down from $9$). In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
 
 ## Conclusion (15 marks)
 
-Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that $75\%$ of drivers will either not be affected at all, or will see an net improvement in their travel times. What does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journey times on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable in the event of a surge. An appropriate utilisation range appears to be in the range $(91.3\%, 97.1\%)$, with values on the higher end achievable with a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.
+Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that $75\%$ of drivers will either not be affected at all, or will remain to see a net improvement in their travel times. Rather, what does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journeys on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable even in the event of a surge. An appropriate utilisation range appears to be in the range $(91.3\%, 97.1\%)$, with values on the higher end achievable by incorporating feedback and a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.
 
 The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out 'platoons' of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system's response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single 'platoon'. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection.
 
