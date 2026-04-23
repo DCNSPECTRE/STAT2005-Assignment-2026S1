@@ -191,15 +191,7 @@ Since this is now underdispersed, a Negative Binomial will no longer fit (hence 
 
 > This occurs because the Negative Binomial is formed as a Compound Poisson (Siegrist, 2022), so if $X=X_1 + X_2 +...+X_n \sim NBinom(k, p)$ then we can model each $X_i$ as $NBinom(\frac{k}{n}, p)$ with the same probability $p$. Extrapolating this $(_{successes}, \space _{probability})$ form to the $(_{mean}, \space _{size})$ form yields the parameters $(\frac{\mu}{n}, \space \frac{r}{n})$.
 
-> Although this is a valid process for the Negative Binomial, we have to make an additional assumption that the volume in each 15 minute interval is uniform. Because of the signalised intersection preceeding the on-ramp, we would inevitably see heavy platoons or 'bursts' forming each couple of minutes. Beaause our simulation erases this variability, it means that the wait-times we find are still likely to understimate reality.
-
-<!--# FOR THE BIT ABOVE -->
-
-I think here we should acknowledge the implications of scaling down to 1-min intervals. Because traffic is "bursty" due to platooning, a real 1-min data set would show higher variance than the scaled parameters. With the scaling we did, we assume that the variance is homogeneous across intervals every interval of \[1,15\]!!!
-
-definintely need to incorporate this
-
-<!--# END OF COMMENT -->
+> Although this is a valid process for the Negative Binomial, we have to make an additional assumption that the volume in each 15 minute interval is uniform. Because of the signalised intersection preceeding the on-ramp, we would inevitably see heavy platoons or 'bursts' forming each couple of minutes. Because our simulation erases this variability, it means that the wait-times we find are still likely to underestimate reality.
 
 ::: caption
 1-min Model Parameter Comparison (Methods 1 and 2)
@@ -281,23 +273,9 @@ The most logical choice was to develop onRampSimulation, as a G/D/c queue using 
 
 3.  Whilst it is known that the ramps function on a **deterministic** release rate, when simulating at a per-minute interval, the release rate could potentially become fractional (i.e., 8.5 vehicles per minute). As logic prevails, it is not possible to have a fractional component of a vehicle, the simulation has been designed around this potential break-point and is able to pass fractional components onto the next release by using a $\text{carry}$. This slightly deviates from a standard G/D/c model, but this trade-off is worth forcing for a more realistic discrete vehicle model.
 
-    <!--# for 3. -->
-
-    We need to state that even though we deviate from the G/D/c due to the fact that we dont have a strictly deterministic system (the carry creates deviation releasing as an example 3,4,3,4,...,4), we are trading that deterministic approach for realistic discrete vehicle modelling which is arguably more useful to model.
-
-    yes good idea!
-
-    <!--#  -->
+    > It may have been made obvious at this stage that there is a deviation from the G/D/c approach as the designed simulation does not have a *strictly deterministic system*. The reason for this is due to the carry. The carry creates deviation in the release of vehicles, as an example, if it is calculated that 3.5 cars are released in 2 iterations, the first iteration will release 3 cars and the second will release 4 cars, and this release pattern is not entirely deterministic. We have decided to trade the strictly deterministic approach for one that is more realistic which is arguably more useful to the model.
 
 4.  The model finally is able to release the allocated number of vehicles (or entire queue if the queue \< release rate). Because we stamped the vehicles with an arrival time, the wait time for each departing vehicle is simply calculated as $\text{Current Time-step - Arrival Time-step}$
-
-<!--# For the simulation QUESTION -->
-
-Just had a thought about the simulation, should we be discarding the simulation data for the first few hundred time steps to act as a "warmup" period. Without it, technically the first set of cars will have a near zero or zero wait time. Unless that is something you wanted to show...
-
-hmm this is intereesting. we could, but i think it would create a weird jump in the cumulative graphs so i don't think its worth worrying about. you can see that for most of the stable systems the queue remains around 0 anyways so it wouldnt change much
-
-<!--# END OF COMMENT -->
 
 ```{r "Primary Simulation"}
 onRampSimulation <- function(steps, alambda, asize, rmu, c) {
