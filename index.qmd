@@ -16,11 +16,19 @@ editor: visual
 
 : *Project Authors*
 
-## Introduction and Background (10 marks)
+## Introduction and Background
 
-Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).
+Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north
 
-This study will focus on the interchange between Reid Highway and the Mitchell Freeway southbound. This is a critical link in Perth's north-west suburbs, as it represents the only highway–freeway interchange in the area and is important in the movement of both people and goods each day. The aim of this study is to determine whether the reported improvements in mainline travel times are offset by increased queuing times for users of this interchange. This will be evaluated by developing a queuing model based on historical traffic data, allowing a comparison of the time spent waiting to enter the freeway with previously reported savings. We will additionally perform parameter optimisation to minimise timing while maintaining stability of the system. For this, it is important to understand the background of stability for a model.
+enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).
+
+[![Ramp Signals - Main Roads (2025)](rampsignal.png){fig-align="center"}](https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf)
+
+This study will focus on the interchange between Reid Highway and the Mitchell Freeway southbound. This is a critical link in Perth's north-west suburbs, as it represents the only highway–freeway interchange in the area and is important in the movement of both people and goods each day.
+
+[![Reid Hwy / Mitchell Fwy Interchange - Google Maps (2022)](reidwhy (2).gif){fig-align="center"}](https://earth.google.com/web/@-31.85633299,115.80041978,21.42114135a,2050.6019463d,35y,-0h,0t,0r/data=CgRCAggBOgMKATBCAggASg0I____________ARAA)
+
+The aim of this study is to determine whether the reported improvements in mainline travel times are offset by increased queuing times for users of this interchange. This will be evaluated by developing a queuing model based on historical traffic data, allowing a comparison of the time spent waiting to enter the freeway with previously reported savings. We will additionally perform parameter optimisation to minimise timing while maintaining stability of the system. For this, it is important to understand the background of stability for a model.
 
 A queuing system with $c$ lanes is stable (i.e. has a controllable load) if its utilisation rate $\rho = \frac{\lambda}{c \times \mu}$ is less than $1$, where $\lambda$ and $\mu$ refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).
 
@@ -80,7 +88,7 @@ ramp23.pk.wk <- ramp23.wk[6 <= ramp23.wk$Hour & ramp23.wk$Hour < 10, ]
 ramp23.pk.wk <- ramp23.pk.wk[date(ramp23.pk.wk$Date.Time.AWST) != "2023-03-06", ]
 ```
 
-## Methodology (25 marks)
+## Methodology
 
 Main Roads have a large online repository of traffic volume measurements from 2013 to the present day. Each entry is a 15-minute interval which can be accessed for any road segment using its unique MLinkID. We can filter for the on-ramp of interest using its ID 5725:
 
@@ -173,7 +181,7 @@ data.frame (
 )
 ```
 
-The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution (*Method 1*) is to simply divide the volume data by $15$ and fit a new model. If we consider this case, our mean will scale by a factor of $\frac{1}{15}$, and the variance by a factor of $\frac{1}{15^2}$:
+The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution ( *Method 1* ) is to simply divide the volume data by $15$ and fit a new model. If we consider this case, our mean will scale by a factor of $\frac{1}{15}$, and the variance by a factor of $\frac{1}{15^2}$:
 
 ::: caption
 1-min Model Parameters (Method 1)
@@ -259,7 +267,7 @@ In terms of release rates, on-ramp metering historically operates on determinist
 
 Therefore, as our model will not account for changes in mainline flow, we will use a simple deterministic release rate.
 
-## Model Implementation and Results (45 marks)
+## Model Implementation and Results
 
 <!--Added a quick description of the simulation function and reworded the first bit of this section. -->
 
@@ -529,9 +537,10 @@ boxplot(plotlist,
         cex=0.8
         )
 abline(v=2, col="red", lw = 2)
+abline(v=7, col="blue", lw = 2)
 legend("topright", 
-       legend = "Proposed 2-Minute Savings (Part 3)",
-       col = "red",
+       legend = c("Proposed 7-Minute Savings (Part 3)","Proposed 2-Minute Savings (Part 3)"),
+       col = c("red","blue"),
        lty = 1, 
        lwd = 2,
        cex =0.6
@@ -780,6 +789,8 @@ If we assume that time improvements are uniform across the freeway, we can equat
 
 Since this we are considering the system as a whole here, let's also expand to moderate spillback. Spillback occurs when a signal provides insufficient capacity, forming a queue that affects and blocks throughput of neighbouring intersections. We first need to find the maximum capacity of the road segment:
 
+[![Example of Spillback - Main Roads (2025)](spillback-mainroads.png){fig-align="center"}](https://youtu.be/5A-NmsAEw_I?si=w6UCZaLtpdHFNQ7i&t=16)
+
 According to Google Earth, the length of road preceding the on-ramp signal is:
 
 -   Single lane: 330m, and
@@ -873,7 +884,7 @@ mean(sim94$wtimesavg < 2)
 
 However, because we incorporate feedback, the new maximum wait-time is only $3$ minute (down from $9$). In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
 
-## Conclusion (15 marks)
+## Conclusion
 
 Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that $75\%$ of drivers will either not be affected at all, or will remain to see a net improvement in their travel times. Rather, what does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journeys on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable even in the event of a surge. An appropriate utilisation range appears to be in the range $(91.3\%, 97.1\%)$, with values on the higher end achievable by incorporating feedback and a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.
 
@@ -924,3 +935,7 @@ Dot.gov. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy 
 [https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-](https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf){.uri}
 
 [roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf](https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf){.uri}
+
+<https://www.youtube.com/watch?v=5A-NmsAEw_I>
+
+<https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf>
