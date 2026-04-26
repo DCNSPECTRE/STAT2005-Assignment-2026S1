@@ -1,7 +1,9 @@
 ---
-title: "A study of on-ramp metering in Perth"
+title: "A Study of Ramp-Metering in Perth"
 format:
   html:
+    toc: true
+    toc-depth: 3
     css: styles.css
 editor: visual
 ---
