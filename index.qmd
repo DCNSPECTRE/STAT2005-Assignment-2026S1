@@ -26,7 +26,7 @@ enjoy these improved speeds as they spend a majority of their journey on the fre
 
 This study will focus on the interchange between Reid Highway and the Mitchell Freeway southbound. This is a critical link in Perth's north-west suburbs, as it represents the only highway–freeway interchange in the area and is important in the movement of both people and goods each day.
 
-[![Reid Hwy / Mitchell Fwy Interchange - Google Maps (2022)](reidwhy (2).gif){fig-align="center"}](https://earth.google.com/web/@-31.85633299,115.80041978,21.42114135a,2050.6019463d,35y,-0h,0t,0r/data=CgRCAggBOgMKATBCAggASg0I____________ARAA)
+[![Reid Hwy / Mitchell Fwy Interchange - Google Maps (2022)](reidwhy%20(2).gif){fig-align="center"}](https://earth.google.com/web/@-31.85633299,115.80041978,21.42114135a,2050.6019463d,35y,-0h,0t,0r/data=CgRCAggBOgMKATBCAggASg0I____________ARAA)
 
 The aim of this study is to determine whether the reported improvements in mainline travel times are offset by increased queuing times for users of this interchange. This will be evaluated by developing a queuing model based on historical traffic data, allowing a comparison of the time spent waiting to enter the freeway with previously reported savings. We will additionally perform parameter optimisation to minimise timing while maintaining stability of the system. For this, it is important to understand the background of stability for a model.
 
