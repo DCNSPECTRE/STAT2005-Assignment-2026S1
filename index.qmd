@@ -8,6 +8,133 @@ format:
 editor: visual
 ---
 
+```{=html}
+<!-- The Floating Button --> <button id="scrollToTopBtn" title="Go to top"> <i class="bi bi-arrow-up-short"></i> </button>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let topButton = document.getElementById("scrollToTopBtn");
+
+
+  window.addEventListener("scroll", function() {
+
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+      topButton.classList.add("visible");
+    } else {
+      topButton.classList.remove("visible");
+    }
+  });
+
+
+  topButton.addEventListener("click", function() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+});
+</script>
+```
+
+```{=html}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let toc = document.getElementById("TOC");
+  let mainContent = document.querySelector("main.content");
+  
+  if (toc && !document.getElementById("toc-search-container")) {
+    let searchContainer = document.createElement("div");
+    searchContainer.id = "toc-search-container";
+    searchContainer.innerHTML = '<input type="text" id="toc-search" placeholder="Search report (Press Enter)...">';
+    toc.insertBefore(searchContainer, toc.firstChild);
+    
+    let searchInput = document.getElementById("toc-search");
+
+    function clearHighlights() {
+      document.querySelectorAll('mark.search-highlight').forEach(mark => {
+        let parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      });
+    }
+
+    searchInput.addEventListener("keyup", function(e) {
+      let filter = searchInput.value.toLowerCase();
+
+      let links = toc.getElementsByTagName("a");
+      for (let i = 0; i < links.length; i++) {
+        let text = links[i].textContent || links[i].innerText;
+        links[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? "block" : "none";
+      }
+
+
+      clearHighlights();
+      if (filter.length < 3) return;
+
+      let safeFilter = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let regex = new RegExp(`(${safeFilter})`, 'gi');
+      let walker = document.createTreeWalker(mainContent, NodeFilter.SHOW_TEXT, null, false);
+      let textNodes = [];
+      
+      while (walker.nextNode()) {
+        let parentName = walker.currentNode.parentNode.nodeName;
+
+        if (parentName !== 'SCRIPT' && parentName !== 'STYLE' && parentName !== 'CODE' && parentName !== 'PRE') {
+          textNodes.push(walker.currentNode);
+        }
+      }
+
+      let firstMatch = null;
+      textNodes.forEach(node => {
+        if (node.nodeValue.match(regex)) {
+          let fragment = document.createDocumentFragment();
+          let parts = node.nodeValue.split(regex);
+          parts.forEach(part => {
+            if (part.toLowerCase() === filter) {
+              let mark = document.createElement('mark');
+              mark.className = 'search-highlight';
+              mark.textContent = part;
+              fragment.appendChild(mark);
+              if (!firstMatch) firstMatch = mark; // Saves the very first match found
+            } else {
+              fragment.appendChild(document.createTextNode(part));
+            }
+          });
+          node.parentNode.replaceChild(fragment, node);
+        }
+      });
+
+      if (e.key === "Enter" && firstMatch) {
+        firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+});
+</script>
+```
+
+:::::::: nav-traffic-banner
+<!-- The Road Centerline -->
+
+::: nav-road-line
+:::
+
+<!-- The Cars (Top Lane - Driving Right) -->
+
+::: {.nav-car .nav-c1}
+:::
+
+::: {.nav-car .nav-c2}
+:::
+
+<!-- The Cars (Bottom Lane - Driving Right) -->
+
+::: {.nav-car .nav-c3}
+:::
+
+::: {.nav-car .nav-c4}
+:::
+::::::::
+
 | Name              | Student ID |
 |-------------------|------------|
 | Christian Fazzari | 22220880   |
@@ -898,44 +1025,43 @@ Nonetheless, the study remains strong at highlighting the overall, large-scale i
 
 ## References
 
-*2025 Annual Report \| Main Roads Western Australia*. (2025). Wa.gov.au; Main Roads Western Australia.
+Burmas, G. (2025, February 3). *Perth drivers still not convinced by benefits of \$200 million smart freeway*. Abc.net.au; ABC News. <https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328>
 
-[https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/](https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf){.uri}
+Google Maps. (2022). *Reid Hwy / Mitchell Fwy Interchange - Google Maps* . Google.com. [https://earth.google.com/web/\@-31.85633299](https://earth.google.com/web/@-31.85633299)
 
-[main-roads-annual-report-2025-interactive-version.pdf](https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/main-roads-annual-report-2025-interactive-version.pdf){.uri}
+Levinson et al., D. (2021, February 28). *6.4: Meterin and analogs*. Engineering LibreTexts; LibreTexts. <https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com>
 
-Burmas, G. (2025, February 3). Perth drivers still not convinced by benefits of \$200 million smart freeway. Abc.net.au; ABC News.
+Main Roads Western Australia. (n.d.-a). *How do ramp signals work?* The Government of Western Australia. Retrieved April 30, 2026, from <https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf>
 
-[https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/](https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328){.uri}
+Main Roads Western Australia. (n.d.-b). *Main roads annual report 2025*. Main Roads WA Government; The Government of Western Australia. Retrieved April 30, 2026, from <https://www.mainroads.wa.gov.au/490d5d/globalassets/about-us/our-organisation/%20%20main-roads-annual-report-2025-interactive-version.pdf>
 
-[104872328](https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328){.uri}
+Main Roads Western Australia. (2024, November 25). *Smart Freeways - On-Ramps with part time lanes*. YouTube. <https://www.youtube.com/watch?v=5A-NmsAEw_I>
 
-Righini, G. (2022). *Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory*.
+Siegrist, K. (2020, May 5). *5.4: Infinitely Divisible Distributions*. Statistics LibreTexts; Creative Commons. <https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions>
 
-[https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20](https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf){.uri}
+The Government of Western Australia. (2018). *Traffic Control -Avoiding End of Queue Collisions on High Speed Roads*. <https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf>
 
-[theory.pdf](https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf){.uri}
+US Department of Transportation. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering*. Dot.gov; FHWA. <https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm>
 
-‌Levinson, D. (2021, February 28). Engineering LibreTexts.
+```{=html}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let ticking = false;
 
-[https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A\_](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com){.uri}
-
-[Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com){.uri}
-
-Siegrist, K. (2022, Apr 24). Statistics LibreTexts. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and\_](#0)
-
-[Stochastic_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](#0)
-
-Dot.gov. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering*. \[online\] Available at:
-
-<https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm>
-
-‌*Traffic Control -Avoiding End of Queue Collisions on High Speed Roads*. (2018). Main Roads.
-
-[https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-](https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf){.uri}
-
-[roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf](https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf){.uri}
-
-<https://www.youtube.com/watch?v=5A-NmsAEw_I>
-
-<https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf>
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(function() {
+          let scrollPosition = window.scrollY;
+          
+          let zoomLevel = Math.min(100 + (scrollPosition / 20), 115);
+          
+          document.body.style.backgroundSize = zoomLevel + "% auto";
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+  });
+</script>
+```
