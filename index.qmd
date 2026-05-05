@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
-
 ```{=html}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -111,8 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
-
-:::::::: nav-traffic-banner
+::: nav-traffic-banner
 <!-- The Road Centerline -->
 
 ::: nav-road-line
@@ -133,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 ::: {.nav-car .nav-c4}
 :::
-::::::::
+:::
 
 | Name              | Student ID |
 |-------------------|------------|
@@ -145,9 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 ## Introduction and Background
 
-Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north
-
-enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).
+Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).
 
 [![Ramp Signals - Main Roads (2025)](rampsignal.png){fig-align="center"}](https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf)
 
@@ -1015,11 +1011,11 @@ However, because we incorporate feedback, the new maximum wait-time is only $3$ 
 
 Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that $75\%$ of drivers will either not be affected at all, or will remain to see a net improvement in their travel times. Rather, what does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journeys on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable even in the event of a surge. An appropriate utilisation range appears to be in the range $(91.3\%, 97.1\%)$, with values on the higher end achievable by incorporating feedback and a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.
 
-The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out 'platoons' of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system's response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single 'platoon'. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection.
+The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out 'platoons' of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system's response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single 'platoon'. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection. One way we could improve on both limitations here would be to implement an agent-based simulation (where vehicles are represented at the individual level). That way, their impact on the mainline could be directly measured, and wait-times represented at the level of seconds.
 
-The simulation also only measures a single point in time, extrapolated as many timesteps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.
+While outlined before, its still important to resurface how the simulation also only measures a single point in time, extrapolated as many timesteps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.
 
-Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates feedback.
+Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates network feedback.
 
 <!--#  -->
 
