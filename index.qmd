@@ -659,11 +659,10 @@ boxplot(plotlist,
         outline=TRUE,
         cex=0.8
         )
-abline(v=2, col="red", lw = 2)
-abline(v=7, col="blue", lw = 2)
+abline(v=2, col="blue", lw = 2)
 legend("topright", 
-       legend = c("Proposed 7-Minute Savings (Part 3)","Proposed 2-Minute Savings (Part 3)"),
-       col = c("red","blue"),
+       legend = c("Proposed 2-Minute Savings (Part 3)"),
+       col = c("blue"),
        lty = 1, 
        lwd = 2,
        cex =0.6
