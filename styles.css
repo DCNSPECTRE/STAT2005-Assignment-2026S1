@@ -27,7 +27,8 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;  
   background-position: top center; 
-  background-size: 100% auto;   
+  background-size: 100% auto;
+  font-size: 0.9rem;   
 }
 
 .quarto-container-default {
@@ -54,7 +55,7 @@ body {
   main.content {
     order: 1 !important;
     flex: 1;
-    max-width: 1500px !important;
+    max-width: 800px !important;
     margin: 0 4rem !important; 
   }
 
