@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
+
 ```{=html}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -110,7 +111,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
-::: nav-traffic-banner
+
+:::::::: nav-traffic-banner
 <!-- The Road Centerline -->
 
 ::: nav-road-line
@@ -131,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 ::: {.nav-car .nav-c4}
 :::
-:::
+::::::::
 
 | Name              | Student ID |
 |-------------------|------------|
@@ -391,8 +393,6 @@ In terms of release rates, on-ramp metering historically operates on determinist
 Therefore, as our model will not account for changes in mainline flow, we will use a simple deterministic release rate.
 
 ## Model Implementation and Results
-
-<!--Added a quick description of the simulation function and reworded the first bit of this section. -->
 
 To evaluate the impact of ramp-metering on queue lengths and wait-times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.
 
