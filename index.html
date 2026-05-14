@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </table>
 <section id="introduction-and-background" class="level2">
 <h2 class="anchored" data-anchor-id="introduction-and-background">Introduction and Background</h2>
-<p>Perth’s freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city’s outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (ABC, 2025).</p>
+<p>Perth’s freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city’s outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads Western Australia, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (Burmas, 2025).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <div class="quarto-figure quarto-figure-center">
@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <p><a href="https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf"><img src="rampsignal.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
 </figure>
 </div>
-<figcaption>Ramp Signals - Main Roads (2025)</figcaption>
+<figcaption>Ramp Signals - (Main Roads Western Australia, n.d.)</figcaption>
 </figure>
 </div>
 <p>This study will focus on the interchange between Reid Highway and the Mitchell Freeway southbound. This is a critical link in Perth’s north-west suburbs, as it represents the only highway–freeway interchange in the area and is important in the movement of both people and goods each day.</p>
@@ -310,11 +310,11 @@ document.addEventListener("DOMContentLoaded", function() {
 <p><a href="https://earth.google.com/web/@-31.85633299,115.80041978,21.42114135a,2050.6019463d,35y,-0h,0t,0r/data=CgRCAggBOgMKATBCAggASg0I____________ARAA"><img src="reidwhy%20(2).gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
 </figure>
 </div>
-<figcaption>Reid Hwy / Mitchell Fwy Interchange - Google Maps (2022)</figcaption>
+<figcaption>Reid Hwy / Mitchell Fwy Interchange - (Google Maps, 2022)</figcaption>
 </figure>
 </div>
 <p>The aim of this study is to determine whether the reported improvements in mainline travel times are offset by increased queuing times for users of this interchange. This will be evaluated by developing a queuing model based on historical traffic data, allowing a comparison of the time spent waiting to enter the freeway with previously reported savings. We will additionally perform parameter optimisation to minimise timing while maintaining stability of the system. For this, it is important to understand the background of stability for a model.</p>
-<p>A queuing system with <span class="math inline">\(c\)</span> lanes is stable (i.e.&nbsp;has a controllable load) if its utilisation rate <span class="math inline">\(\rho = \frac{\lambda}{c \times \mu}\)</span> is less than <span class="math inline">\(1\)</span>, where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mu\)</span> refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson, 2021).</p>
+<p>A queuing system with <span class="math inline">\(c\)</span> lanes is stable (i.e.&nbsp;has a controllable load) if its utilisation rate <span class="math inline">\(\rho = \frac{\lambda}{c \times \mu}\)</span> is less than <span class="math inline">\(1\)</span>, where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mu\)</span> refer to the mean arrival and departure rates respectively (Righini, 2020). In terms of ramp-metering, this utilisation rate is typically maintained in a range below capacity as a means of risk aversion, or avoiding a total breakdown of the queue system (Levinson et al, 2021).</p>
 </section>
 <section id="methodology" class="level2">
 <h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
@@ -375,8 +375,8 @@ document.addEventListener("DOMContentLoaded", function() {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.2479 163.5174
-Poisson Sim   112.9540 112.9540</code></pre>
+NBinom Sim    113.0936 159.5638
+Poisson Sim   113.1729 113.1729</code></pre>
 </div>
 </div>
 <p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution ( <em>Method 1</em> ) is to simply divide the volume data by <span class="math inline">\(15\)</span> and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
@@ -420,12 +420,11 @@ Vehicles/min (Method 2)   7.548485  17.595080</code></pre>
 8am (mean) 11.581818 13.37102</code></pre>
 </div>
 </div>
-<p>In terms of release rates, on-ramp metering historically operates on deterministic parameters. This means that a fixed number of vehicles are released per time-unit, assuming that vehicles do not run the stop phase. Modern-day systems implement a more dynamic rate, determined live from mainline traffic volume and speed (Dot.gov, 2000). However, these still remain inherently deterministic because given a set of conditions, there is mathematical reasoning behind the release rate, not randomness.</p>
+<p>In terms of release rates, on-ramp metering historically operates on deterministic parameters. This means that a fixed number of vehicles are released per time-unit, assuming that vehicles do not run the stop phase. Modern-day systems implement a more dynamic rate, determined live from mainline traffic volume and speed (Federal Highway Administration(FHWA), U.S. Department of Transportation, 2000). However, these still remain inherently deterministic because given a set of conditions, there is mathematical reasoning behind the release rate, not randomness.</p>
 <p>Therefore, as our model will not account for changes in mainline flow, we will use a simple deterministic release rate.</p>
 </section>
 <section id="model-implementation-and-results" class="level2">
 <h2 class="anchored" data-anchor-id="model-implementation-and-results">Model Implementation and Results</h2>
-<!--Added a quick description of the simulation function and reworded the first bit of this section. -->
 <p>To evaluate the impact of ramp-metering on queue lengths and wait-times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.</p>
 <p>The most logical choice was to develop onRampSimulation, as a G/D/c queue using the following logic:</p>
 <ol type="1">
@@ -732,7 +731,7 @@ F-statistic: 5.518e+05 on 1 and 5 DF,  p-value: 8.393e-14</code></pre>
 <p><a href="https://youtu.be/5A-NmsAEw_I?si=w6UCZaLtpdHFNQ7i&amp;t=16"><img src="spillback-mainroads.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
 </figure>
 </div>
-<figcaption>Example of Spillback - Main Roads (2025)</figcaption>
+<figcaption>Example of Spillback - (Main Roads Western Australia, 2024)</figcaption>
 </figure>
 </div>
 <p>According to Google Earth, the length of road preceding the on-ramp signal is:</p>
@@ -740,7 +739,7 @@ F-statistic: 5.518e+05 on 1 and 5 DF,  p-value: 8.393e-14</code></pre>
 <li><p>Single lane: 330m, and</p></li>
 <li><p>Double lane: 120m</p></li>
 </ul>
-<p>We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
+<p>We can also source an effective 8.5m length for a queued passenger vehicle (Main Roads Western Australia, 2018), accounting for both the length of the vehicle and a gap infront. This leads to a total capacity of <span class="math inline">\(\frac{330+120 \times 2}{8.5}\approx67\)</span> vehicles before spillback occurs.</p>
 <p>Consider two models with the following parameters:</p>
 <ol type="1">
 <li><p><span class="math inline">\(91.3\%\)</span> and <span class="math inline">\(97.1\%\)</span> utilisation rates</p></li>
@@ -833,6 +832,7 @@ H_a = p &gt; p_o
 <p>Siegrist, K. (2020, May 5). <em>5.4: Infinitely Divisible Distributions</em>. Statistics LibreTexts; Creative Commons. <a href="https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions" class="uri">https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions</a></p>
 <p>The Government of Western Australia. (2018). <em>Traffic Control -Avoiding End of Queue Collisions on High Speed Roads</em>. <a href="https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf" class="uri">https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf</a></p>
 <p>US Department of Transportation. (2000). <em>Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering</em>. Dot.gov; FHWA. <a href="https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm" class="uri">https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm</a></p>
+<p>Righini, G. (2020). Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory. In <em>University of Milan</em>. University of Milan. <a href="https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf" class="uri">https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf</a></p>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     let ticking = false;

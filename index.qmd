@@ -911,7 +911,7 @@ If we assume that time improvements are uniform across the freeway, we can equat
 
 Since this we are considering the system as a whole here, let's also expand to moderate spillback. Spillback occurs when a signal provides insufficient capacity, forming a queue that affects and blocks throughput of neighbouring intersections. We first need to find the maximum capacity of the road segment:
 
-[![Example of Spillback - (Main Roads Western Australia, 2024) ](spillback-mainroads.png){fig-align="center"}](https://youtu.be/5A-NmsAEw_I?si=w6UCZaLtpdHFNQ7i&t=16)
+[![Example of Spillback - (Main Roads Western Australia, 2024)](spillback-mainroads.png){fig-align="center"}](https://youtu.be/5A-NmsAEw_I?si=w6UCZaLtpdHFNQ7i&t=16)
 
 According to Google Earth, the length of road preceding the on-ramp signal is:
 
