@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
-
 ```{=html}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -111,8 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
-
-:::::::: nav-traffic-banner
+::: nav-traffic-banner
 <!-- The Road Centerline -->
 
 ::: nav-road-line
@@ -133,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 ::: {.nav-car .nav-c4}
 :::
-::::::::
+:::
 
 | Name              | Student ID |
 |-------------------|------------|
@@ -1024,7 +1022,9 @@ Burmas, G. (2025, February 3). *Perth drivers still not convinced by benefits of
 
 Google Maps. (2022). *Reid Hwy / Mitchell Fwy Interchange - Google Maps* . Google.com. [https://earth.google.com/web/\@-31.85633299](https://earth.google.com/web/@-31.85633299)
 
-Levinson et al., D. (2021, February 28). *6.4: Meterin and analogs*. Engineering LibreTexts; LibreTexts. <https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com>
+Levinson et al., D. (2021, February 28). *6.4: Meterin and analogs*. Engineering LibreTexts; LibreTexts. [https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com){.uri}
+
+[\_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com](https://eng.libretexts.org/Bookshelves/Civil_Engineering/Fundamentals_of_Transportation/06%3A_Traffice_Control/6.04%3A_Metering_and_Analogs?utm_source=chatgpt.com){.uri}
 
 Main Roads Western Australia. (n.d.-a). *How do ramp signals work?* The Government of Western Australia. Retrieved April 30, 2026, from <https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf>
 
@@ -1032,7 +1032,9 @@ Main Roads Western Australia. (n.d.-b). *Main roads annual report 2025*. Main Ro
 
 Main Roads Western Australia. (2024, November 25). *Smart Freeways - On-Ramps with part time lanes*. YouTube. <https://www.youtube.com/watch?v=5A-NmsAEw_I>
 
-Siegrist, K. (2020, May 5). *5.4: Infinitely Divisible Distributions*. Statistics LibreTexts; Creative Commons. <https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions>
+Siegrist, K. (2020, May 5). *5.4: Infinitely Divisible Distributions*. Statistics LibreTexts; Creative Commons. [https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic](https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions){.uri}
+
+[\_Processes\_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions](https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/05%3A_Special_Distributions/5.04%3A_Infinitely_Divisible_Distributions){.uri}
 
 The Government of Western Australia. (2018). *Traffic Control -Avoiding End of Queue Collisions on High Speed Roads*. <https://www.mainroads.wa.gov.au/494be1/globalassets/technical-commercial/working-on-roads/traffic-management/factsheet-avoiding-end-of-queue-collisions.pdf>
 
