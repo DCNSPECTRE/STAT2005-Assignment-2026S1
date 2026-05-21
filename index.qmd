@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
+
 ```{=html}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -110,7 +111,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ```
-::: nav-traffic-banner
+
+:::::::: nav-traffic-banner
 <!-- The Road Centerline -->
 
 ::: nav-road-line
@@ -131,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 ::: {.nav-car .nav-c4}
 :::
-:::
+::::::::
 
 | Name              | Student ID |
 |-------------------|------------|
@@ -141,9 +143,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 : *Project Authors*
 
-## Introduction and Background
+> URL: <https://dcnspectre.github.io/STAT2005-Assignment-2026S1/>
 
-Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads Western Australia, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (Burmas, 2025).
+## 1. Introduction and Background
+
+Perth's freeway network has undergone significant changes in recent years. One of the more controversial upgrades is the Smart Freeways project; a modification which aims to improve travel times of commuters from the city's outer suburbs heading toward the center. This system has been implemented on both the Kwinana Freeway Northbound and the Mitchell Freeway Southbound, managing traffic flow primarily through digital speed-limit gantries and on-ramp metering. The system works in the same way other normal traffic lights, however the system determines how much traffic can enter the freeway and it does so by varying the red signal time on at the ramp gantry (Main Roads Western Australia, n.d.). On the Mitchell South, travel times during the morning peak have been reduced by up to seven minutes for trips from Hester Avenue, Clarkson to Vincent Street, Leederville (Main Roads Western Australia, 2025). Road users further north enjoy these improved speeds as they spend a majority of their journey on the freeway mainline. However, commuters closer to the city are more affected by ramp-metering, since a smaller proportion of their trip occurs on the freeway itself. As a result, some drivers have reported their morning commute times more than doubling in length (Burmas, 2025).
 
 [![Ramp Signals - (Main Roads Western Australia, n.d.)](rampsignal.png){fig-align="center"}](https://www.mainroads.wa.gov.au/4a44ed/globalassets/technical-commercial/technical-library/its/how-do-ramp-signals-work.pdf)
 
@@ -211,7 +215,7 @@ ramp23.pk.wk <- ramp23.wk[6 <= ramp23.wk$Hour & ramp23.wk$Hour < 10, ]
 ramp23.pk.wk <- ramp23.pk.wk[date(ramp23.pk.wk$Date.Time.AWST) != "2023-03-06", ]
 ```
 
-## Methodology
+## 2. Methodology
 
 Main Roads have a large online repository of traffic volume measurements from 2013 to the present day. Each entry is a 15-minute interval which can be accessed for any road segment using its unique MLinkID. We can filter for the on-ramp of interest using its ID 5725:
 
@@ -390,7 +394,7 @@ In terms of release rates, on-ramp metering historically operates on determinist
 
 Therefore, as our model will not account for changes in mainline flow, we will use a simple deterministic release rate.
 
-## Model Implementation and Results
+## 3. Model Implementation and Results
 
 To evaluate the impact of ramp-metering on queue lengths and wait-times, a custom queuing simulation was developed. Whilst standard models, such as an M/D/c, are capable of estimating steady-state averages, they cannot easily accommodate the overdispersed Negative Binomial arrival patterns or allow for sub-15 minute granularity. Hence, the most logical approach was to develop a discrete-event simulation that evaluates queues based on a per-minute basis.
 
@@ -496,7 +500,7 @@ runMultiSims <- function(steps, alambdas, asizes, rmus, c){
 }
 ```
 
-### Part 1 - Sensitivity Analysis
+### 3.1 - Sensitivity Analysis
 
 For each model we have developed, consider the critical point where the utilisation parameter $\rho$ is exactly one. Rearranging in terms of the release rate, we find $\mu = \frac{\lambda}{1 \times c}$ whichs allows us to determine the largest timing possible for each system to remain stable. As 2 lanes are present at the Reid Highway on-ramp, we set $c=2$ and form three G/D/2 queues with the following parameters:
 
@@ -709,7 +713,7 @@ We can therefore split the sensitivity of a stable system into two distinctions:
 
 Once below about $95\%$ utilisation, there is only a minimal improvement to wait-times for the $50th$ and $75th$ percentiles even for a large change in the release rate. This means that it is critical to find a $\mu$ that balances both a consistent and restrictive release of vehicles without breaking down. A system that would function best here is one with live feedback - dynamically adjusting its $\mu$ based on a live wait-time distribution.
 
-### Part 2 - Transient Response
+### 3.2 - Transient Response
 
 Another important regard is to understand how the queuing system responds to a sudden change in the vehicle arrival pattern. For this we need to develop a new function, identical but including:
 
@@ -895,7 +899,7 @@ summary(sim1$wtimesavg) # 97.1% utiisation
 
 Like before, we can see that the wait-times of road users are still not greatly impacted. Even in a more extreme scenario, although it may take some time for the system to 'catch-up', road users do not actually experience this as a significant increase in their individual wait-times.
 
-### Part 3 - Overall System Impact
+### 3.3 - Overall System Impact
 
 Main Roads has a proposed 7-minute improvement in Southbound travel times following the implementation of Smart Freeways. This is calculated from Hester Avenue (Clarkson) to Vincent Street (Leederville), but there are no defined figures from Reid Highway specifically.
 
@@ -1002,21 +1006,21 @@ summary(sim94$wtimesavg)
 mean(sim94$wtimesavg < 2)
 ```
 
-However, because we incorporate feedback, the new maximum wait-time is only $3$ minute (down from $9$). In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
+However, because we incorporate feedback, the new maximum wait-time is only $3$ minutes (down from $9$). In this situation, $78.4\%$ (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.
 
-## Conclusion
+## 4. Conclusion
 
 Overall, a great majority of road users will see a benefit from Smart Freeways. We have seen that the third quantile of wait-times is generally insensitive to changes in release rates as long as stability is maintained. It typically remains under 2 minutes, meaning that $75\%$ of drivers will either not be affected at all, or will remain to see a net improvement in their travel times. Rather, what does seem to grow exponentially are the outlier wait-times. Therefore, this study does not invalidate drivers who have experienced unreasonable journeys on the Smart Freeways system. We have seen that this is certainly possible, with wait-times pushing above 9-minutes in our earlier every-day models. However, when feedback is incorporated, it is possible to both sufficiently restrict traffic while keeping maximum wait-times acceptable even in the event of a surge. An appropriate utilisation range appears to be in the range $(91.3\%, 97.1\%)$, with values on the higher end achievable by incorporating feedback and a temporary third-lane. Of course, these findings are only valuable for the Mitchell Southbound on-ramp via Reid Highway.
 
 The largest limitation of the study is that it did not deeply consider the influence of released vehicles on the freeway itself. After all, the very purpose of ramp-metering is to smooth out 'platoons' of vehicles entering the mainline. Therefore, its possible that in a pursuit of smaller wait-times, we adjusted the release rate in a way that diminishes this important purpose. This limitation is in conjunction with the resolution of the study. While efforts were made to increase granularity from 15-minutes to one, it would be useful to zoom in even further. Perhaps we could measure the system's response to the arrival of vehicles over a single light phase – allowing us to judge how it averages out a single 'platoon'. However, this would require more detailed measurements of the light phases and cycles of the preceding intersection. One way we could improve on both limitations here would be to implement an agent-based simulation (where vehicles are represented at the individual level). That way, their impact on the mainline could be directly measured, and wait-times represented at the level of seconds.
 
-While outlined before, its still important to resurface how the simulation also only measures a single point in time, extrapolated as many timesteps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.
+While outlined before, its still important to resurface how the simulation also only measures a single point in time, extrapolated as many time steps as needed. In the future, it could be expanded to consider the entire course of the morning rush, with the release rate dynamically adjusting based on arrival patterns.
 
 Nonetheless, the study remains strong at highlighting the overall, large-scale impact of ramp-metering on road users. Given an appropriate utilisation rate, even significant step-changes do not greatly impact the wait-time distribution of vehicles. Therefore, for the majority of road users, Smart Freeways is a system which shows great potential given that it is appropriately optimised and incorporates network feedback.
 
 <!--#  -->
 
-## References
+## 5. References
 
 Burmas, G. (2025, February 3). *Perth drivers still not convinced by benefits of \$200 million smart freeway*. Abc.net.au; ABC News. <https://www.abc.net.au/news/2025-02-04/perth-smart-freeway-mitchell-kwinana-freeway/104872328>
 
@@ -1041,6 +1045,14 @@ The Government of Western Australia. (2018). *Traffic Control -Avoiding End of Q
 US Department of Transportation. (2000). *Ramp Metering: A Proven, Cost-Effective Operational Strategy - APrimer: 1. Overview of Ramp Metering*. Dot.gov; FHWA. <https://ops.fhwa.dot.gov/publications/fhwahop14020/sec1.htm>
 
 Righini, G. (2020). Introduction Probability distributions Birth-and-death process Results for some queuing systems Queuing systems design Queuing theory. In *University of Milan*. University of Milan. <https://homes.di.unimi.it/righini/Didattica/Logistica/MaterialeLog/S4%20-%20Queuing%20theory.pdf>
+
+## 6. Contributions
+
+**C. Fazzari**: Conceptualistion, Methodology, Investigation, Visualisation, Validation, Writing - Original Draft, Writing - Review & Editing, Formal Analysis
+
+**A. Atif**: Conceptulisation, Investigation, Project Administration, Writing - Original Draft, Writing - Review & Editing, Supervision
+
+**M. Jeelaga**: Writing - Review & Editing, Resources
 
 ```{=html}
 <script>
