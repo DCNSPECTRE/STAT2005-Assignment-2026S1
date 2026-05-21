@@ -148,6 +148,124 @@ window.Quarto = {
 </header>
 
 
+<!-- The Floating Button --> <button id="scrollToTopBtn" title="Go to top"> <i class="bi bi-arrow-up-short"></i> </button>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let topButton = document.getElementById("scrollToTopBtn");
+
+
+  window.addEventListener("scroll", function() {
+
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+      topButton.classList.add("visible");
+    } else {
+      topButton.classList.remove("visible");
+    }
+  });
+
+
+  topButton.addEventListener("click", function() {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let toc = document.getElementById("TOC");
+  let mainContent = document.querySelector("main.content");
+  
+  if (toc && !document.getElementById("toc-search-container")) {
+    let searchContainer = document.createElement("div");
+    searchContainer.id = "toc-search-container";
+    searchContainer.innerHTML = '<input type="text" id="toc-search" placeholder="Search report (Press Enter)...">';
+    toc.insertBefore(searchContainer, toc.firstChild);
+    
+    let searchInput = document.getElementById("toc-search");
+
+    function clearHighlights() {
+      document.querySelectorAll('mark.search-highlight').forEach(mark => {
+        let parent = mark.parentNode;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+      });
+    }
+
+    searchInput.addEventListener("keyup", function(e) {
+      let filter = searchInput.value.toLowerCase();
+
+      let links = toc.getElementsByTagName("a");
+      for (let i = 0; i < links.length; i++) {
+        let text = links[i].textContent || links[i].innerText;
+        links[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? "block" : "none";
+      }
+
+
+      clearHighlights();
+      if (filter.length < 3) return;
+
+      let safeFilter = filter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let regex = new RegExp(`(${safeFilter})`, 'gi');
+      let walker = document.createTreeWalker(mainContent, NodeFilter.SHOW_TEXT, null, false);
+      let textNodes = [];
+      
+      while (walker.nextNode()) {
+        let parentName = walker.currentNode.parentNode.nodeName;
+
+        if (parentName !== 'SCRIPT' && parentName !== 'STYLE' && parentName !== 'CODE' && parentName !== 'PRE') {
+          textNodes.push(walker.currentNode);
+        }
+      }
+
+      let firstMatch = null;
+      textNodes.forEach(node => {
+        if (node.nodeValue.match(regex)) {
+          let fragment = document.createDocumentFragment();
+          let parts = node.nodeValue.split(regex);
+          parts.forEach(part => {
+            if (part.toLowerCase() === filter) {
+              let mark = document.createElement('mark');
+              mark.className = 'search-highlight';
+              mark.textContent = part;
+              fragment.appendChild(mark);
+              if (!firstMatch) firstMatch = mark; // Saves the very first match found
+            } else {
+              fragment.appendChild(document.createTextNode(part));
+            }
+          });
+          node.parentNode.replaceChild(fragment, node);
+        }
+      });
+
+      if (e.key === "Enter" && firstMatch) {
+        firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+});
+</script>
+<div class="nav-traffic-banner">
+<!-- The Road Centerline -->
+<div class="nav-road-line">
+
+</div>
+<!-- The Cars (Top Lane - Driving Right) -->
+<div class="nav-car nav-c1">
+
+</div>
+<div class="nav-car nav-c2">
+
+</div>
+<!-- The Cars (Bottom Lane - Driving Right) -->
+<div class="nav-car nav-c3">
+
+</div>
+<div class="nav-car nav-c4">
+
+</div>
+</div>
 <table class="caption-top table">
 <caption><em>Project Authors</em></caption>
 <thead>
@@ -257,8 +375,8 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Mean Variance
 Dataset       113.2273 161.8030
-NBinom Sim    113.2368 162.0425
-Poisson Sim   113.3337 113.3337</code></pre>
+NBinom Sim    113.2991 163.3912
+Poisson Sim   113.2509 113.2509</code></pre>
 </div>
 </div>
 <p>The Negative Binomial is a much better fit to the original dataset. However, a new concern arises: for the purpose of simulation, we wish to simulate vehicle-counts on a per-minute basis. This will help to increase the granularity of our queuing time results beyond the 15-minute intervals provided in the dataset. One possible solution ( <em>Method 1</em> ) is to simply divide the volume data by <span class="math inline">\(15\)</span> and fit a new model. If we consider this case, our mean will scale by a factor of <span class="math inline">\(\frac{1}{15}\)</span>, and the variance by a factor of <span class="math inline">\(\frac{1}{15^2}\)</span>:</p>
@@ -692,7 +810,7 @@ H_a = p &gt; p_o
 <pre><code>[1] 0.784</code></pre>
 </div>
 </div>
-<p>However, because we incorporate feedback, the new maximum wait-time is only <span class="math inline">\(3\)</span> minutes (down from <span class="math inline">\(9\)</span>). In this situation, <span class="math inline">\(78.4\%\)</span> (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.</p>
+<p>However, because we incorporate feedback, the new maximum wait-time is only <span class="math inline">\(3\)</span> minute (down from <span class="math inline">\(9\)</span>). In this situation, <span class="math inline">\(78.4\%\)</span> (a majority) of drivers will still see a net improvement in their travel time when heading towards the city. Due to the inherent variation of traffic flow, it is not reasonable for every driver to individually see a net improvement in their travel time from this on-ramp. For some, and most, road users it is – but not all.</p>
 </section>
 </section>
 <section id="conclusion" class="level2">
